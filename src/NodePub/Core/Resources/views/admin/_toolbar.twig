@@ -1,0 +1,48 @@
+<!-- START of NodePub Toolbar -->
+<div id="npub_container">
+    <div id="npub_toolbar_container">
+        <div id="npub_toolbar">
+            <div id="npub_icons">
+                <ul>
+                    <li class="site"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li class="site"><a href="{{ path('admin_sites') }}">Sites</a></li>
+                    <li class="layouts"><a href="{{ path('admin_sitemap') }}">Nodes</a></li>
+                    <li class="layouts"><a href="{{ path('admin_themes') }}">Themes</a></li>
+                    <li class="users"><a href="{{ path('admin_users') }}">Users</a></li>
+                    <li class="cache"><a href="{{ path('admin_clear_cache') }}">Cache</a></li>
+                </ul>
+            </div>
+            <div id="npub_userbox">
+                <p>{{ username }}</p>
+                <ul id="npub_usernav">
+                    <li><a href="{{ path('admin_user', {username: username }) }}">Account</a></li>
+                    <li><a href="{# path('admin_logout') #}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="npub_panel_container" class="hide"></div>
+    <a id="npub_menu_toggle" href="{{ path('admin_dashboard') }}"><i class="icon-reorder"></i></a>
+</div>
+{# see old version for how stylesheets and js are imported using a helper #}
+<link rel="stylesheet" href="/npub/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/npub/css/npub_main.css" />
+<script data-main="/npub/js/main" src="/npub/js/require-jquery.js"></script>
+
+<script type="text/html" id="npub_block_types_temp">
+    <ul class="nav nav-list">
+        {% for type in block_types %}
+            <li><a href="{{ path('admin_new_block', {namespace: type.namespace}) }}" data-panel="open">{{ type.name }}</a></li>
+        {% endfor %}
+    </ul>
+</script>
+
+<script type="text/html" id="npub_block_actions_temp">
+    <ul class="nav nav-list">
+        <li><a href="/admin/blocks/<%= id %>/edit" data-panel="open"><i class="icon-pencil"></i> Edit</a></li>
+        <li><a href="/admin/blocks/<%= id %>/move"><i class="icon-move"></i> Move</a></li>
+        <li><a href="/admin/blocks/<%= id %>/delete"><i class="icon-trash"></i> Delete</a></li>
+    </ul>
+</script>
+
+<!-- END of NodePub Toolbar -->

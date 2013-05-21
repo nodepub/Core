@@ -1,0 +1,29 @@
+{
+    "name": "nodepub/core",
+    "description": "A small example implementation of NodePub themable blog engine",
+    "keywords": ["silex", "twig", "cms"],
+    "license": "MIT",
+    "authors": [
+        {"name": "Andrew Gruner", "email": "andrew.gruner@gmail.com"}
+    ],
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/nodepub/BlogEngine"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/nodepub/ThemeEngine"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "dflydev/markdown": "1.0.*",
+        "silex/silex": "1.0.*@dev",
+        "twig/twig": ">=1.10,<2.0-dev",
+        "symfony/twig-bridge": "~2.3",
+        "monolog/monolog": ">=1.0.0",
+        "nodepub/theme-engine": "*"
+    }
+}
