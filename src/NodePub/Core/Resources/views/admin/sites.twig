@@ -1,0 +1,10 @@
+{% extends '@core/admin/panel.twig' %}
+
+{% block nav %}Sites{% endblock %}
+
+{% block content %}
+    {% for site in sites %}
+        <h3>{{ site.name }}</h3>
+        <h4>({{ site.domainName }})</h4>
+    {% endfor %}
+{% endblock %}

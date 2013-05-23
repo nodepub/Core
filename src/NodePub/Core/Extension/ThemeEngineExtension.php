@@ -3,18 +3,33 @@
 namespace NodePub\Core\Extension;
 
 use NodePub\Core\Extension\Extension;
+use NodePub\Core\Model\ToolbarItem;
+
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class ThemeEngineExtension extends Extension
 {
-    protected $name = 'Theme Extension';
-
-    public function registerAdminJsModules() {
-        return array('np/themeEngine', 'np/colorPicker');
+    public function getName() {
+        return 'NodePub Theme';
     }
 
-    public function registerAdminContent()
+    public function getResourceManifest() {
+        return array(
+            'css/spectrum.css',
+            'js/lib/spectrum.js',
+            'js/np/themeEngine.js',
+            'js/np/colorPicker.js'
+        );
+    }
+
+    public function getToolbarItems() {
+        return array(
+            new ToolbarItem('Themes', 'get_themes'),
+        );
+    }
+
+    public function getAdminContent()
     {
         $content = '';
 

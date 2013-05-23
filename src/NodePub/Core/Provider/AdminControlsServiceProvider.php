@@ -2,10 +2,10 @@
 
 namespace NodePub\Core\Provider;
 
+use NodePub\Core\Model\ToolbarItem;
+
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-
-
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,16 +13,31 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Service Provider for Silex integration
  */
-class AdminServiceProvider implements ServiceProviderInterface
+class AdminControlsServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['np.admin'] = false;
+        // display admin controlls
+        $app['np.admin'] = $app->share(function($app) {
+            return (isset($app['security']) && true === $app['security']->isGranted('ROLE_ADMIN'));
+        });
 
+        // base url for all admin routes
         $app['np.admin.mount_point'] = '/np-admin';
 
-        $app['np.admin.dashboarrd'] = $app->share(function($app) {
-            //return new Dashboard();
+        // active toolbar items
+        $app['np.admin.toolbar'] = $app->share(function($app) {
+
+            $toolbar = new Toolbar();
+
+            $toolbar
+                ->addItem(new ToolbarItem('Dashboard', 'admin_dashboard'))
+                ->addItem(new ToolbarItem('Sites', 'admin_sites'))
+                ->addItem(new ToolbarItem('Nodes', 'admin_sitemap'))
+                ->addItem(new ToolbarItem('Users', 'admin_users'))
+                ->addItem(new ToolbarItem('Cache', 'admin_clear_cache'));
+
+            return $toolbar;
         });
     }
 
@@ -49,7 +64,7 @@ class AdminServiceProvider implements ServiceProviderInterface
         $app->after(function(Request $request, Response $response) use ($app) {
             # Inject the theme switcher form onto the page
             # if 'theme_preview' is set in the session
-            if ($app['np_admin'] === true) {
+            if ($app['np.admin'] === true) {
 
 
             }

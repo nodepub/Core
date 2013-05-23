@@ -1,0 +1,32 @@
+{% extends '@default/layout.twig' %}
+
+{% block title %}Nodepub Login{% endblock %}
+{% block body_class %}npub_login{% endblock %}
+{% block styles %}<link href="/css/nodepub.css" rel="stylesheet" />{% endblock %}
+
+{% block body %}
+    <form action="{{ path('admin_authenticate') }}" method="post">
+        <header>
+            <h1>Nodepub</h1>
+            <div id="flash_msg" class="{{ flash_level }}">
+                {% if flash_level == 'err' %}
+                    {{ error }}
+                {% else %}
+                    Please login below.
+                {% endif %}
+            </div>
+        </header>
+        <div class="form_body">
+            <label for="username">Username</label>
+            <input type="text" name="_username" id="username" value="{{ last_username }}" />
+            <br/>
+            <label for="password">Password</label>
+            <input type="password" name="_password" id="password" value="" />
+            <br/>
+            <input type="submit" value="Login" />
+        </div>
+    </form>
+{% endblock %}
+
+{# remove the dashboard #}
+{% block dashboard %}{% endblock %}

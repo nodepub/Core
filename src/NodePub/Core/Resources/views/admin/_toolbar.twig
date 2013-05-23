@@ -4,12 +4,9 @@
         <div id="npub_toolbar">
             <div id="npub_icons">
                 <ul>
-                    <li class="site"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
-                    <li class="site"><a href="{{ path('admin_sites') }}">Sites</a></li>
-                    <li class="layouts"><a href="{{ path('admin_sitemap') }}">Nodes</a></li>
-                    <li class="layouts"><a href="{{ path('admin_themes') }}">Themes</a></li>
-                    <li class="users"><a href="{{ path('admin_users') }}">Users</a></li>
-                    <li class="cache"><a href="{{ path('admin_clear_cache') }}">Cache</a></li>
+                    {% for item in toolbar %}
+                        <li class="{{ item.slug }}"><a href="{{ path(item.route) }}">{{ item.name }}</a></li>
+                    {% endfor %}
                 </ul>
             </div>
             <div id="npub_userbox">

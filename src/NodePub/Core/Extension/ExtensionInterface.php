@@ -1,7 +1,8 @@
 <?php
 
-namespace NodePub/Core/Extension;
+namespace NodePub\Core\Extension;
 
+use NodePub\Core\Extension\SnippetQueue;
 use Silex\Application;
 
 /**
@@ -9,17 +10,45 @@ use Silex\Application;
  */
 interface ExtensionInterface
 {
+    /**
+     * @return string
+     */
     public function getName();
 
-    public function register(Application $app, array $config = array());
+    /**
+     * @return string
+     */
+    public function getResourceDirectory();
 
-    public function registerAdminContent();
+    /**
+     * @return array
+     */
+    public function getResourceManifest();
 
-    public function registerDashboardComponents();
+    /**
+     * @return string
+     */
+    public function getAdminContent();
 
-    public function registerBlockTypes();
+    /**
+     * Returns the toolbar items to add to the admin toolbar.
+     *
+     * @return array An array of ToolbarItem instances
+     */
+    public function getToolbarItems();
 
-    public function registerTwigFunctions();
+    /**
+     * @return array An array of BlockType instances
+     */
+    public function getBlockTypes();
 
-    public function registerSnippets();
+    /**
+     * @return array An array of Twig Functions
+     */
+    public function getTwigFunctions();
+
+    /**
+     * @return array An array of snippets
+     */
+    public function getSnippets();
 }

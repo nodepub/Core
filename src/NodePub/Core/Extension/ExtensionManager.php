@@ -3,18 +3,25 @@
 namespace NodePub\Core\Extension;
 
 use NodePub\Core\Extension\ExtensionInterface;
+use NodePub\Core\Extension\SnippetQueue;
+use NodePub\Core\Extension\DomManipulator;
+
 use Symfony\Component\HttpFoundation\Response;
 
 class ExtensionManager
 {
     protected $app;
+    protected $extensions;
+    protected $snippetQueue;
     protected $booted;
     protected $adminEnabled;
-    protected $extensions;
     
     function __construct(Application $app)
     {
         $this->app = $app;
+        $this->extensions = array();
+        $this->snippetQueue = new SnippetQueue();
+        $this->booted = false;
     }
 
     /**
@@ -26,9 +33,8 @@ class ExtensionManager
      */
     public function register(ExtensionInterface $extension, array $config = array())
     {
-        $this->extensions[] = $extension;
-
-        $extension->register($this->app, $config);
+        //$extension->register($this->app, $config);
+        $this->extensions[$extension->getName()] = $extension;
 
         return $this;
     }
@@ -40,35 +46,93 @@ class ExtensionManager
     {
         if (!$this->booted) {
             foreach ($this->extensions as $extension) {
-                $extension->boot($this);
+                $this->snippetQueue->add($extension->getSnippets());
+                $this->activateToolbarItems($extension);
             }
 
             $this->booted = true;
         }
     }
 
-    public function injectAdminContent(Response $response) {
-        if (true === $this->adminEnabled) {
-            $adminContent = '';
-            foreach ($this->extensions as $extension) {
-                $content.= $extension->registerAdminContent();
-            }
+    protected function activateToolbarItems(ExtensionInterface $extension)
+    {
+        foreach ($extension->getToolbarItems() as $item) {
+            $this->app['np.admin.toolbar']->addItem($item);
+        }
+    }
 
-            if (function_exists('mb_stripos')) {
-                $posrFunction = 'mb_strripos';
-                $substrFunction = 'mb_substr';
-            } else {
-                $posrFunction = 'strripos';
-                $substrFunction = 'substr';
-            }
+    public function installResorces()
+    {
+        foreach ($this->extensions as $extension) {
 
-            $content = $response->getContent();
+            $extension = $this->getExtension($extensionName);
 
-            if (false !== $pos = $posrFunction($content, '</body>')) {
-                $adminContent = "\n".str_replace("\n", '', $adminContent)."\n";
-                $content = $substrFunction($content, 0, $pos).$adminContent.$substrFunction($content, $pos);
-                $response->setContent($content);
+            foreach ($extension->getResourceManifest() as $resourcePath) {
+                $file = $extension->getResourceDirectory().$resourcePath;
+                if (file_exists($file)) {
+                    symlink($this->app['np.web_dir'].'/npub/'.$resourcePath, realpath($file));
+                }
             }
         }
+    }
+
+    public function uninstallResorces($extensionName)
+    {
+
+        $extension = $this->getExtension($extensionName);
+
+        foreach ($extension->getResourceManifest() as $resourcePath) {
+        }
+    }
+
+    public function getExtension($extensionName)
+    {
+        if (isset($this->extensions[$extensionName])) {
+            return $this->extensions[$extensionName];
+        }
+
+        throw new \Exception("No extension found with name [$extensionName]");
+    }
+
+    public function aggregateAdminContent()
+    {
+
+        $adminContent = '';
+
+        if (true === $this->adminEnabled) {
+            $adminContent = $this->aggregateMethods('getAdminContent');
+        }
+
+        return $adminContent;
+    }
+
+    public function aggregateMethods($method)
+    {
+        $results = array();
+        foreach ($this->extensions as $extension) {
+            if (method_exists($extension, $method)) {
+                $results[]= call_user_func(array($extension, $method));
+            }
+        }
+
+        if (is_string(reset($results))) {
+            $results = implode('', $results);
+        }
+
+        return $results;
+    }
+
+    public function prepareAdminContent()
+    {
+        $this->snippetQueue->insert(DomManipulator::END_BODY, $this->aggregateAdminContent());
+    }
+
+    public function processSnippets(Response $response)
+    {
+        foreach ($this->extensions as $extension) {
+            $this->snippetQueue->add($extension->getSnippets());
+        }
+
+        $html = $this->snippetQueue->processAll($response->getContent());
     }
 }

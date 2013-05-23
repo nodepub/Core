@@ -8,23 +8,36 @@ use Silex\Application;
 abstract class Extension implements ExtensionInterface
 {
     protected $app;
-    protected $config;
+
+    public function __construct(Application $app) {
+        $this->app = $app;
+    }
 
     public abstract function getName();
 
-    public function register($app, array $config = array())
-    {
-        $this->app = $app;
-        $this->config = $config;
+    public abstract function getResourceDirectory();
+
+    public function getResourceManifest() {
+        return array();
     }
 
-    public abstract function registerAdminContent();
+    public function getAdminContent() {
+        return '';
+    }
 
-    public abstract function registerDashboardComponents();
+    public function getToolbarItems() {
+        return array();
+    }
 
-    public abstract function registerBlockTypes();
+    public function getBlockTypes() {
+        return array();
+    }
 
-    public abstract function registerTwigFunctions();
+    public function getTwigFunctions() {
+        return array();
+    }
 
-    public abstract function registerSnippets();
+    public function getSnippets() {
+        return array();
+    }
 }
