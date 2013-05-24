@@ -43,7 +43,7 @@ class ThemeEngineExtension extends Extension
         if ($this->app['session']->get('theme_preview')) {
             $content .= $this->getThemeSwitcher();
         }
-
+        
         return $content;
     }
 

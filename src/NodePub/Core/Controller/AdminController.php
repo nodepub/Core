@@ -39,21 +39,6 @@ class AdminController
             return new Response();
         }
     }
-
-    public function sitesAction(Application $app)
-    {
-        $sites = $app['db.orm.em']
-            ->getRepository('NodePub\Model\Site')
-            ->findAll();
-        
-        // if ($this->isApiRequest($request)) {
-        //     return $app->json($nodes);
-        // }
-        
-        return new Response($app['twig']->render('@core/admin/sites.twig', array(
-            'sites' => $sites
-        )));
-    }
     
     public function sitemapAction(Request $request, Application $app)
     {

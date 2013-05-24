@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Model;
+namespace NodePub\Core\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -65,7 +65,7 @@ class Site
     }
 
     /**
-     * @param string $domainName
+     * @param string $hostName
      */
     public function setHostName($hostName)
     {   
