@@ -21,7 +21,7 @@ class ExtensionServiceProvider implements ServiceProviderInterface
 
         $app['np.extensions'] = $app->share(function($app) {
             return array(
-                new ThemeEngineExtension(),
+                new ThemeEngineExtension($app),
             );
         });
     }
@@ -32,11 +32,11 @@ class ExtensionServiceProvider implements ServiceProviderInterface
             $app['np.extension_manager']->register($extension);
         }
 
-        $app['np.admin.toolbar'] = array_merge($app['np.admin.toolbar'], $app['np.extension_manager']->getToolbarItems());
+        $app['np.extension_manager']->boot();
 
         $app->after(function(Request $request, Response $response) use ($app) {
             $app['np.extension_manager']->prepareAdminContent();
-            $app['np.extension_manager']->processSnippets($response);
+            $app['np.extension_manager']->insertSnippets($response);
         });
     }
 }

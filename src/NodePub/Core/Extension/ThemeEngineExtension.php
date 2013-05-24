@@ -14,12 +14,16 @@ class ThemeEngineExtension extends Extension
         return 'NodePub Theme';
     }
 
+    public function getResourceDirectory() {
+        return '';
+    }
+
     public function getResourceManifest() {
         return array(
-            'css/spectrum.css',
-            'js/lib/spectrum.js',
-            'js/np/themeEngine.js',
-            'js/np/colorPicker.js'
+            '/css/spectrum.css',
+            '/js/lib/spectrum.js',
+            '/js/np/themeEngine.js',
+            '/js/np/colorPicker.js'
         );
     }
 
@@ -29,17 +33,25 @@ class ThemeEngineExtension extends Extension
         );
     }
 
+    /**
+     * If theme_preview is in the session, adds the theme switcher form.
+     */
     public function getAdminContent()
     {
         $content = '';
 
-        if ($theme = $this->app['session']->get('theme_preview')) {
+        if ($this->app['session']->get('theme_preview')) {
             $content .= $this->getThemeSwitcher();
         }
 
         return $content;
     }
 
+    /**
+     * Fetches the rendered theme switcher form through a subrequest.
+     *
+     * @return string
+     */
     protected function getThemeSwitcher()
     {
         $subRequest = Request::create($this->app['url_generator']->generate('theme_switcher', array('referer' => urlencode($this->app['request']->getPathInfo()))));

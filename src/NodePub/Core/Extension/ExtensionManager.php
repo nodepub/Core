@@ -6,6 +6,7 @@ use NodePub\Core\Extension\ExtensionInterface;
 use NodePub\Core\Extension\SnippetQueue;
 use NodePub\Core\Extension\DomManipulator;
 
+use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExtensionManager
@@ -14,26 +15,24 @@ class ExtensionManager
     protected $extensions;
     protected $snippetQueue;
     protected $booted;
-    protected $adminEnabled;
     
     function __construct(Application $app)
     {
         $this->app = $app;
         $this->extensions = array();
-        $this->snippetQueue = new SnippetQueue();
+        $this->snippetQueue = new SnippetQueue($app);
         $this->booted = false;
     }
 
     /**
      * Registers an extension.
      *
-     * @param ExtensionInterface $extension A ExtensionInterface instance
+     * @param ExtensionInterface $extension An ExtensionInterface instance
      *
      * @return ExtensionManager
      */
-    public function register(ExtensionInterface $extension, array $config = array())
+    public function register(ExtensionInterface $extension)
     {
-        //$extension->register($this->app, $config);
         $this->extensions[$extension->getName()] = $extension;
 
         return $this;
@@ -54,13 +53,31 @@ class ExtensionManager
         }
     }
 
+    /**
+     * Tests if admin features are enabled
+     *
+     * @return bool
+     */
+    protected function isAdminEnabled()
+    {
+        return (isset($this->app['np.admin']) && true === $this->app['np.admin']);
+    }
+
+    /**
+     * Adds all toolbar items from all extensions to the application toolbar
+     */
     protected function activateToolbarItems(ExtensionInterface $extension)
     {
-        foreach ($extension->getToolbarItems() as $item) {
-            $this->app['np.admin.toolbar']->addItem($item);
+        if ($this->isAdminEnabled() && isset($this->app['np.admin.toolbar'])) {
+            foreach ($extension->getToolbarItems() as $item) {
+                $this->app['np.admin.toolbar']->addItem($item);
+            }
         }
     }
 
+    /**
+     * Symlinks all extension resources to the web root
+     */
     public function installResorces()
     {
         foreach ($this->extensions as $extension) {
@@ -76,12 +93,15 @@ class ExtensionManager
         }
     }
 
+    /**
+     * Removes an extension's resources from the web root.
+     */
     public function uninstallResorces($extensionName)
     {
-
         $extension = $this->getExtension($extensionName);
 
         foreach ($extension->getResourceManifest() as $resourcePath) {
+            unlink();
         }
     }
 
@@ -94,19 +114,24 @@ class ExtensionManager
         throw new \Exception("No extension found with name [$extensionName]");
     }
 
-    public function aggregateAdminContent()
+    public function collectAdminContent()
     {
-
         $adminContent = '';
 
-        if (true === $this->adminEnabled) {
-            $adminContent = $this->aggregateMethods('getAdminContent');
+        if ($this->isAdminEnabled()) {
+            $adminContent = $this->collectMethodCalls('getAdminContent');
         }
 
         return $adminContent;
     }
 
-    public function aggregateMethods($method)
+    /**
+     * Calls a method on each extension and collects the results in an array.
+     *
+     * @param string $method The method name
+     * @return array The collected method returns
+     */
+    public function collectMethodCalls($method)
     {
         $results = array();
         foreach ($this->extensions as $extension) {
@@ -122,17 +147,27 @@ class ExtensionManager
         return $results;
     }
 
+    /**
+     * Aggregates admin content from all extensions and adds it to the snippet queue
+     * for insertion right before the closing </body> tag.
+     */
     public function prepareAdminContent()
     {
-        $this->snippetQueue->insert(DomManipulator::END_BODY, $this->aggregateAdminContent());
+        $this->snippetQueue->insert(DomManipulator::END_BODY, $this->collectAdminContent());
     }
 
-    public function processSnippets(Response $response)
+    /**
+     * Adds all snippets to a queue and inserts them all into the response body.
+     *
+     * @param Response
+     */
+    public function insertSnippets(Response $response)
     {
         foreach ($this->extensions as $extension) {
             $this->snippetQueue->add($extension->getSnippets());
         }
 
         $html = $this->snippetQueue->processAll($response->getContent());
+        $response->setContent($html);
     }
 }

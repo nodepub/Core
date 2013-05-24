@@ -2,6 +2,7 @@
 
 namespace NodePub\Core\Provider;
 
+use NodePub\Core\Model\Toolbar;
 use NodePub\Core\Model\ToolbarItem;
 
 use Silex\Application;

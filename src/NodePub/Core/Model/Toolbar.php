@@ -18,7 +18,8 @@ class Toolbar
 
     function addItem(ToolbarItem $item)
     {
-        $this->items[] $item;
+        $this->items[]= $item;
+        return $this;
     }
 
     /**

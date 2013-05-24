@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Core;
+namespace NodePub\Core\Extension;
 
 use NodePub\Core\Extension\ExtensionInterface;
 use Silex\Application;

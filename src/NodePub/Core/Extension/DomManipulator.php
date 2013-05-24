@@ -5,25 +5,50 @@ namespace NodePub\Core\Extension;
 use Silex\Application;
 
 /**
- * TODO: look into using https://github.com/wasinger/htmlpagedom
+ * Inserts html into the DOM.
+ * Code originally part of Bolt CMS.
+ * @todo look into using https://github.com/wasinger/htmlpagedom instead of just string manipulation
  */
 class DomManipulator
 {
-    const START_HEAD = 'start_of_head';
-    const END_HEAD   = 'end_of_head';
-    const START_BODY = 'start_of_body';
-    const END_BODY   = 'end_of_body';
-    const END_HTML   = 'end_of_html';
-    const AFTER_META = 'after_meta';
-    const AFTER_CSS  = 'after_css';
-    const BEFORE_JS  = 'before_js';
-    const AFTER_JS   = 'after_js';
+    const START_HEAD = 'StartOfHead';
+    const END_HEAD   = 'EndOfHead';
+    const START_BODY = 'StartOfBody';
+    const END_BODY   = 'EndOfBody';
+    const END_HTML   = 'EndOfHtml';
+    const AFTER_META = 'AfterMeta';
+    const AFTER_CSS  = 'AfterCss';
+    const BEFORE_JS  = 'BeforeJs';
+    const AFTER_JS   = 'AfterJs';
 
     protected $addjquery;
+    protected $insertionMethodsMap;
     protected $matchedComments;
 
     /**
-     * Helper function to insert some HTML into thestart of the head section of
+     * Maps insertion points to the methods that perform the insertion.
+     */
+    public function getInsertionMethodsMap()
+    {
+        if (is_null($this->insertionMethodsMap)) {
+            $this->insertionMethodsMap = array(
+                self::START_HEAD => 'insert'.self::START_HEAD,
+                self::END_HEAD   => 'insert'.self::END_HEAD,
+                self::AFTER_META => 'insert'.self::AFTER_META,
+                self::AFTER_CSS  => 'insert'.self::AFTER_CSS,
+                self::BEFORE_JS  => 'insert'.self::BEFORE_JS,
+                self::AFTER_JS   => 'insert'.self::AFTER_JS,
+                self::START_BODY => 'insert'.self::START_BODY,
+                self::END_BODY   => 'insert'.self::END_BODY,
+                self::END_HTML   => 'insert'.self::END_HTML,
+            );
+        }
+
+        return $this->insertionMethodsMap;
+    }
+
+    /**
+     * Inserts HTML into the start of the head section of
      * an HTML page, right after the <head> tag.
      *
      * @param  string $tag
@@ -46,31 +71,8 @@ class DomManipulator
     }
 
     /**
-     * Helper function to insert some HTML into thestart of the head section of
-     * an HTML page, right after the <head> tag.
-     *
-     * @param  string $tag
-     * @param  string $html
-     * @return string
-     */
-    public function insertStartOfBody($tag, $html)
-    {
-        // first, attempt to insert it after the <body> tag, matching indentation.
-        if (preg_match("~^([ \t]+)<body(.*)~mi", $html, $matches)) {
-            // Try to insert it after <body>
-            $replacement = sprintf("%s\n%s\t%s", $matches[0], $matches[1], $tag);
-            $html = str_replace($matches[0], $replacement, $html);
-        } else {
-            // Since we're serving tag soup, just append it.
-            $html .= $tag."\n";
-        }
-
-        return $html;
-    }
-
-    /**
-     * Helper function to insert HTML into the head section of an HTML
-     * page, right before the </head> tag.
+     * Inserts HTML into the head section of an HTML page,
+     * right before the closing </head> tag.
      *
      * @param  string $tag
      * @param  string $html
@@ -92,19 +94,20 @@ class DomManipulator
     }
 
     /**
-     * Helper function to insert HTML into the body section of an HTML
-     * page, right before the </body> tag.
+     * 
+     * Inserts HTML into the start of the body section of
+     * an HTML page, right after the <body> tag.
      *
      * @param  string $tag
      * @param  string $html
      * @return string
      */
-    public function insertEndOfBodyX($tag, $html)
+    public function insertStartOfBody($tag, $html)
     {
-        // first, attempt to insert it before the </body> tag, matching indentation.
-        if (preg_match("~^([ \t]?)</body~mi", $html, $matches)) {
-            // Try to insert it just before </body>
-            $replacement = sprintf("%s\t%s\n%s", $matches[1], $tag, $matches[0]);
+        // first, attempt to insert it after the <body> tag, matching indentation.
+        if (preg_match("~^([ \t]+)<body(.*)~mi", $html, $matches)) {
+            // Try to insert it after <body>
+            $replacement = sprintf("%s\n%s\t%s", $matches[0], $matches[1], $tag);
             $html = str_replace($matches[0], $replacement, $html);
         } else {
             // Since we're serving tag soup, just append it.
@@ -114,6 +117,28 @@ class DomManipulator
         return $html;
     }
 
+    /**
+     * Inserts HTML into the body section of an HTML page,
+     * right before the </body> tag.
+     *
+     * @param  string $tag
+     * @param  string $html
+     * @return string
+     */
+    // public function insertEndOfBodyX($tag, $html)
+    // {
+    //     // first, attempt to insert it before the </body> tag, matching indentation.
+    //     if (preg_match("~^([ \t]?)</body~mi", $html, $matches)) {
+    //         // Try to insert it just before </body>
+    //         $replacement = sprintf("%s\t%s\n%s", $matches[1], $tag, $matches[0]);
+    //         $html = str_replace($matches[0], $replacement, $html);
+    //     } else {
+    //         // Since we're serving tag soup, just append it.
+    //         $html .= $tag."\n";
+    //     }
+
+    //     return $html;
+    // }
     public function insertEndOfBody($tag, $html)
     {
         if (function_exists('mb_stripos')) {
@@ -124,16 +149,16 @@ class DomManipulator
             $substrFunction = 'substr';
         }
 
-        if (false !== $pos = $posrFunction($tag, '</body>')) {
-            $tag = "\n".str_replace("\n", '', $tag)."\n";
-            
-            return $substrFunction($tag, 0, $pos).$tag.$substrFunction($tag, $pos);
+        if (false !== $pos = $posrFunction($html, '</body>')) {
+            $html = $substrFunction($html, 0, $pos).$tag.$substrFunction($html, $pos);
         }
+
+        return $html;
     }
 
     /**
-     * Helper function to insert HTML into the html section of an HTML
-     * page, right before the </html> tag.
+     * Inserts HTML into the html section of an HTML page,
+     * right before the closing </html> tag.
      *
      * @param  string $tag
      * @param  string $html
@@ -155,7 +180,7 @@ class DomManipulator
     }
 
     /**
-     * Helper function to insert HTML into the head section of an HTML page.
+     * Inserts HTML into the head section of an HTML page.
      *
      * @param  string $tag
      * @param  string $html
