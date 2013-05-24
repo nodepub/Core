@@ -15,6 +15,22 @@ class AdminController
     {
         return $app->redirect($app['url_generator']->generate('admin_dashboard'));
     }
+
+    /**
+     * Toolbar
+     */
+    public function toolbarAction(Application $app)
+    {
+        if (true || $app['security']->isGranted('ROLE_ADMIN')) {
+            //$token = $app['security']->getToken();
+            return new Response($app['twig']->render('@core/admin/_toolbar.twig', array(
+                'username' => 'foo', //$token->getUser()->getUsername(),
+                'toolbar' => $app['np.admin.toolbar']->getActiveItems()
+            )));
+        } else {
+            return new Response();
+        }
+    }
     
     /**
      * Dashboard
@@ -23,22 +39,6 @@ class AdminController
     {
         return new Response($app['twig']->render('@core/admin/dashboard.twig'));
     }
-
-    /**
-     * Toolbar
-     */
-    public function toolbarAction(Application $app)
-    {
-        if ($app['security']->isGranted('ROLE_ADMIN')) {
-            $token = $app['security']->getToken();
-            return new Response($app['twig']->render('@core/admin/_toolbar.twig', array(
-                'username' => $token->getUser()->getUsername(),
-                'toolbar' => $app['np.admin.toolbar']->getActiveItems()
-            )));
-        } else {
-            return new Response();
-        }
-    }
     
     public function sitemapAction(Request $request, Application $app)
     {
@@ -46,31 +46,10 @@ class AdminController
             ->getRepository('NodePub\Model\Node')
             ->findAll();
         
-        // if ($this->isApiRequest($request)) {
-        //             return $app->json($nodes);
-        //         }
-        
         return new Response($app['twig']->render('@core/admin/sitemap.twig', array(
             'nodes' => $nodes,
             'node_types' => array(),
             'components' => array()
-        )));
-    }
-
-    public function themesAction(Request $request, Application $app)
-    {
-        $themes = $app['theme.manager']->loadThemeConfigs();
-        
-        foreach ($themes as $config) {
-            $config['layouts'] = $app['theme.manager']->getThemeLayouts($config['name']);
-        }
-        
-        // if ($this->isApiRequest($request)) {
-        //     return $app->json($themes);
-        // }
-        
-        return new Response($app['twig']->render('@core/admin/themes.twig', array(
-            'themes' => $themes
         )));
     }
 

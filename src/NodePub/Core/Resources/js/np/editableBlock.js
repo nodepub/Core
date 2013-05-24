@@ -1,20 +1,37 @@
-define(['jquery', 'underscore', 'panel'], function($, _, panel) {
+define(['jquery', 'underscore'], function($, _) {
 
     return {
+
+        init: function() {
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            var that = this;
+            $(document).bind('npEnabled', function(e) {
+                that.enableEditableAreas();
+                that.enableEditableBlocks();
+            });
+
+            $(document).bind('npDisabled', function(e) {
+                that.disableEditableAreas();
+                that.disableEditableBlocks();
+            });
+        },
 
         enableEditableAreas: function() {
 
             var that = this;
 
-            $('.npub_area').each(function() {
+            $('.np_area').each(function() {
                 var $this = $(this),
-                    $addBlock = $this.find('.npub_add_block')
+                    $addBlock = $this.find('.np_add_block')
                     ;
                 $addBlock.find('a').attr('href', '/admin/blocks/' + area + '/new');
 
                 if (!$addBlock.length) {
                     var area = $this.attr('data-area');
-                    $addBlock = $('<div class="npub_add_block"><i class="icon-plus-sign"></i><a href="#">Add block to '+area+'</a></div>');
+                    $addBlock = $('<div class="np_add_block"><i class="icon-plus-sign"></i><a href="#">Add block to '+area+'</a></div>');
 
                     $addBlock.find('a').attr('href', '/admin/blocks/' + area + '/new');
 
@@ -28,20 +45,20 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
         },
 
         disableEditableAreas: function() {
-            $('.npub_add_block').hide();
+            $('.np_add_block').hide();
         },
 
         enableEditableBlocks: function() {
 
             var that = this;
 
-            $('.npub_editable_block').each(function() {
+            $('.np_editable_block').each(function() {
                 var $this = $(this),
-                    $mask = $this.find('.npub_mask')
+                    $mask = $this.find('.np_mask')
                     ;
 
                 if (!$mask.length) {
-                    $mask = $('<div class="npub_mask"></div>');
+                    $mask = $('<div class="np_mask"></div>');
                     $mask.width($this.width() - 2);
                     $mask.height($this.height() - 2);
                     $mask.click(that.doBlockClick);
@@ -53,7 +70,7 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
         },
 
         disableEditableBlocks: function() {
-            $('.npub_mask').hide();
+            $('.np_mask').hide();
         },
 
         doAddBlockClick: function(e) {
@@ -66,7 +83,7 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
                 placement: 'right',
                 html: true,
                 trigger: 'manual',
-                content: $("#npub_block_types_temp").html()
+                content: $("#np_block_types_temp").html()
             });
 
             if ($this.data('active') === true) {
@@ -77,12 +94,12 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
                 $this.data('active', true);
             }
 
-            $(document).bind('npubDisabled', function() {
+            $(document).bind('npDisabled', function() {
                 $this.popover('hide');
                 $this.data('active', false);
             });
 
-            $(document).bind('npubPanelEnabled', function() {
+            $(document).bind('npPanelEnabled', function() {
                 $this.popover('hide');
                 $this.data('active', false);
             });
@@ -91,7 +108,7 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
         doBlockClick: function(e) {
             e.preventDefault();
 
-            var template = $("#npub_block_actions_temp").html(),
+            var template = $("#np_block_actions_temp").html(),
                 $this = $(this),
                 id = $this.parent().attr('data-block-id')
                 ;
@@ -111,12 +128,12 @@ define(['jquery', 'underscore', 'panel'], function($, _, panel) {
                 $this.data('active', true);
             }
 
-            $(document).bind('npubDisabled', function() {
+            $(document).bind('npDisabled', function() {
                 $this.popover('hide');
                 $this.data('active', false);
             });
 
-            $(document).bind('npubPanelEnabled', function() {
+            $(document).bind('npPanelEnabled', function() {
                 $this.popover('hide');
                 $this.data('active', false);
             });

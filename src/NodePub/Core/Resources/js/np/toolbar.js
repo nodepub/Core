@@ -1,13 +1,13 @@
-define(['jquery', 'editableBlock', 'panel'], function($, editableBlock, panel) {
+define(['jquery'], function($) {
 
-    var enabledClass = 'npub_enabled',
-        disabledClass = 'npub_disabled';
+    var enabledClass = 'np_enabled',
+        disabledClass = 'np_disabled';
 
     return {
 
         init: function() {
             var that = this;
-            $('#npub_menu_toggle').click(function(e) {
+            $('#np_menu_toggle').click(function(e) {
                 e.preventDefault();
 
                 var $this = $(this);
@@ -15,40 +15,27 @@ define(['jquery', 'editableBlock', 'panel'], function($, editableBlock, panel) {
                 if ($this.data('enabled') === true) {
                     that.disable();
                     $this.data('enabled', false);
-                    $(document).trigger('npubDisabled');
+                    $(document).trigger('npDisabled');
                 } else {
                     that.enable();
                     $this.data('enabled', true);
-                    $(document).trigger('npubEnabled');
+                    $(document).trigger('npEnabled');
                 }
-            });
-
-            $('#npub_icons a').click(function(e) {
-                e.preventDefault();
-                var $this = $(this),
-                    href = $this.attr('href');
-                    panel.open(href);
             });
         },
 
         enable: function() {
             $('body').addClass(enabledClass);
             $('body').removeClass(disabledClass);
-            $('#npub_container').addClass(enabledClass);
-            $('#npub_container').removeClass(disabledClass);
-
-            editableBlock.enableEditableAreas();
-            editableBlock.enableEditableBlocks();
+            $('#np_container').addClass(enabledClass);
+            $('#np_container').removeClass(disabledClass);
         },
 
         disable: function() {
             $('body').addClass(disabledClass);
             $('body').removeClass(enabledClass);
-            $('#npub_container').addClass(disabledClass);
-            $('#npub_container').removeClass(enabledClass);
-
-            editableBlock.disableEditableAreas();
-            editableBlock.disableEditableBlocks();
+            $('#np_container').addClass(disabledClass);
+            $('#np_container').removeClass(enabledClass);
         }
     };
 });

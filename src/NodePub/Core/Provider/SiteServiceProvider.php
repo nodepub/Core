@@ -68,11 +68,11 @@ class SiteServiceProvider implements ServiceProviderInterface
         $siteControllers = $app['controllers_factory'];
 
         $siteControllers->get('/', 'np.sites.controller:sitesAction')
-            ->bind('get_sites');
+            ->bind('admin_sites');
 
         $siteControllers->match('/{hostName}/settings', 'np.sites.controller:settingsAction')
             ->convert('hostName', $siteProvider)
-            ->bind('site_settings');
+            ->bind('admin_site_settings');
 
         $app->mount($app['np.sites.mount_point'], $siteControllers);
     }

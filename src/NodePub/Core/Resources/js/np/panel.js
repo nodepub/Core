@@ -1,20 +1,30 @@
 define(['jquery'], function($) {
 
+    function handleOpenClick(e) {
+        e.preventDefault();
+        panel.open($(this).attr('href'));
+    }
+
+    function handleCloseClick(e) {
+        e.preventDefault();
+        panel.close();
+    }
+
     var panel = {
-        panelContainer: $('#npub_panel_container'),
+        panelContainer: $('#np_panel_container'),
 
         init: function() {
-            var that = this;
-            // Activate panel links
-            $('a[data-panel="open"]').live('click', function(e) {
-                e.preventDefault();
-                that.open($(this).attr('href'));
-            });
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            this.panelContainer.delegate('a[data-panel="open"]', 'click', handleOpenClick);
+            this.panelContainer.delegate('a[data-close="panel"]', 'click', handleCloseClick);
         },
 
         open: function(url) {
 
-            $(document).trigger('npubPanelEnabled');
+            $(document).trigger('npPanelEnabled');
 
             var that = this;
 
@@ -23,24 +33,17 @@ define(['jquery'], function($) {
                 success: function(data) {
                     that.panelContainer.html(data);
                     that.panelContainer.show();
-
-                    that.panelContainer.find('a[data-close="panel"]').click(function(e) {
-                        e.preventDefault();
-                        that.close();
-                    });
                 }
             });
         },
 
         close: function() {
             this.panelContainer.hide();
-            $(document).trigger('npubPanelDisabled');
+            $(document).trigger('npPanelDisabled');
         },
 
         showSpinner: function() {}
     };
-
-    panel.init();
 
     return panel;
 });
