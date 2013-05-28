@@ -17,13 +17,21 @@ class CoreExtension extends Extension
         return '';
     }
 
+    public function getResourceManifest() {
+        return array(
+            '/js/np/toolbar.js',
+            '/js/np/panel.js'
+        );
+    }
+
     public function getToolbarItems() {
         return array(
-            new ToolbarItem('Dashboard', 'admin_dashboard'),
-            //new ToolbarItem('Sites', 'admin_sites'),
-            new ToolbarItem('Pages', 'admin_sitemap'),
-            new ToolbarItem('Users', 'admin_users'),
-            new ToolbarItem('Cache', 'admin_clear_cache')
+            new ToolbarItem('Dashboard', 'admin_dashboard', 'dashboard'),
+            //new ToolbarItem('Sites', 'admin_sites', 'asterisk'),
+            new ToolbarItem('Pages', 'admin_sitemap', 'sitemap'),
+            new ToolbarItem('Users', 'admin_users', 'user'),
+            new ToolbarItem('Cache', 'admin_clear_cache', 'bolt'),
+            // new ToolbarItem('Extensions', 'admin_extensions', 'puzzle-piece')
         );
     }
 

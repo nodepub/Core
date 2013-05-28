@@ -2,9 +2,14 @@
 
 namespace NodePub\Core\Provider;
 
+use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Model\Toolbar;
+use NodePub\ThemeEngine\ThemeEvents;
+
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use Symfony\Component\EventDispatcher\Event;
+
 
 /**
  * Service Provider that registers admin settings and dashboard objects
@@ -21,19 +26,60 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         // base url for all admin routes
         $app['np.admin.mount_point'] = '/np-admin';
 
+        // theme to use for the admin ui
+        $app['np.admin.theme'] = 'np-admin';
+
         // initialize empty toolbar,
         // extensions will register individual toolbar items
         $app['np.admin.toolbar'] = $app->share(function() {
             return new Toolbar();
         });
+
+        $app['np.admin.controller'] = $app->share(function($app) {
+            return new AdminController($app);
+        });
     }
 
     public function boot(Application $app)
     {
+        if (false === $app['np.admin']) {
+            return;
+        }
+
         $app->before(function() use ($app) {
-            $app['twig.loader.filesystem']->addPath(__DIR__.'/../Resources/views', 'core');
+            // $app['twig.loader.filesystem']->addPath(__DIR__.'/../Resources/views', 'core');
+
+            $app['np.admin.theme'] = $app->share(function($app) {
+                if (isset($app['np.theme.manager'])) {
+                    $app['np.theme.manager']->get($app['np.admin.theme']);
+                }
+            });
+
         });
 
+        $app->on(ThemeEvents::THEME_MANAGER_INITIALIZED, function(Event $event) use ($app) {
+            $app['np.admin.theme'] = $app->share(function($app) {
+                if (isset($app['np.theme.manager'])
+                    && $theme = $app['np.theme.manager']->getTheme($app['np.admin.theme'])) {
+
+                    $javascripts = array();
+
+                    // add all extension js modules
+                    $resources = $app['np.extension_manager']->collectMethodCalls('getResourceManifest');
+                    foreach ($resources as $resource) {
+                        if (0 === strpos($resource, '/js')) {
+                            $javascripts[] = $resource;
+                        }
+                    }
+
+                    $theme->addJavaScripts($javascripts);
+
+                    $app['np.theme.manager']->setTheme($theme);
+
+                    return $theme;
+                }
+            });
+        });
 
         # ===================================================== #
         #    ADMIN ROUTES                                       #
@@ -41,38 +87,44 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 
         $admin = $app['controllers_factory'];
 
-        $admin->get('/', 'NodePub\Core\Controller\AdminController::indexAction');
+        $admin->get('/', 'np.admin.controller::indexAction');
 
         // TODO this should be added dynamically only if not installed yet
-        $admin->get('/install', 'NodePub\Core\Controller\AdminController::installAction')
+        $admin->get('/install', 'np.admin.controller:installAction')
             ->bind('admin_install');
 
-        $admin->get('/toolbar', 'NodePub\Core\Controller\AdminController::toolbarAction')
+        $admin->get('/toolbar', 'np.admin.controller:toolbarAction')
             ->bind('admin_toolbar');
 
-        $admin->get('/dashboard', 'NodePub\Core\Controller\AdminController::dashboardAction')
+        $admin->get('/settings/more', 'np.admin.controller:moreSettingsAction')
+            ->bind('admin_more_settings');
+
+        $admin->get('/js/require', 'np.admin.controller:javaScriptsAction')
+            ->bind('admin_javascripts');
+
+        $admin->get('/dashboard', 'np.admin.controller:dashboardAction')
             ->bind('admin_dashboard');
 
-        $admin->get('/users', 'NodePub\Core\Controller\AdminController::usersAction')
+        $admin->get('/users', 'np.admin.controller:usersAction')
             ->bind('admin_users');
 
-        $admin->get('/users/{username}', 'NodePub\Core\Controller\AdminController::userAction')
+        $admin->get('/users/{username}', 'np.admin.controller:userAction')
             ->bind('admin_user');
 
-        $admin->get('/logs', 'NodePub\Core\Controller\AdminController::logAction')
+        $admin->get('/logs', 'np.admin.controller:logAction')
             ->bind('admin_logs');
 
-        $admin->get('/stats', 'NodePub\Core\Controller\AdminController::statsAction')
+        $admin->get('/stats', 'np.admin.controller:statsAction')
             ->bind('admin_stats');
 
-        $admin->get('/sitemap', 'NodePub\Core\Controller\AdminController::sitemapAction')
+        $admin->get('/sitemap', 'np.admin.controller:sitemapAction')
             ->bind('admin_sitemap');
 
-        $admin->post('/clear-cache/{all}', 'NodePub\Core\Controller\AdminController::clearCacheAction')
+        $admin->post('/clear-cache/{all}', 'np.admin.controller:clearCacheAction')
             ->value('all', 'no')
             ->bind('admin_clear_cache');
 
-        $admin->get('/test-email', 'NodePub\Core\Controller\AdminController::testEmailAction');
+        $admin->get('/test-email', 'np.admin.controller:testEmailAction');
 
         # ===================================================== #
         #    ADMIN - NODE EDITING ROUTES                        #

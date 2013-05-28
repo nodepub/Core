@@ -8,82 +8,121 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminController
 {
+    protected $app;
+
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+    }
+
     /**
      * Index - redirects to dashboard
      */
-    public function indexAction(Application $app)
+    public function indexAction()
     {
-        return $app->redirect($app['url_generator']->generate('admin_dashboard'));
+        return $this->app->redirect($this->app['url_generator']->generate('admin_dashboard'));
     }
 
     /**
      * Toolbar
      */
-    public function toolbarAction(Application $app)
+    public function toolbarAction()
     {
-        if (true || $app['security']->isGranted('ROLE_ADMIN')) {
-            //$token = $app['security']->getToken();
-            return new Response($app['twig']->render('@core/admin/_toolbar.twig', array(
-                'username' => 'foo', //$token->getUser()->getUsername(),
-                'toolbar' => $app['np.admin.toolbar']->getActiveItems()
-            )));
-        } else {
-            return new Response();
+        // if (true !== $this->app['security']->isGranted('ROLE_ADMIN')) {
+        //     return new Response();
+        // }
+
+        //$token = $this->app['security']->getToken();
+        return new Response($this->app['twig']->render('@np-admin/_toolbar.twig', array(
+            'username' => 'Andrew', //$token->getUser()->getUsername(),
+            'toolbar' => $this->app['np.admin.toolbar']->getActiveItems(),
+            'js_modules' => array()
+        )));
+    }
+
+    /**
+     * Dynamically compiles all require.js modules defined by each extension
+     */
+    public function javaScriptsAction()
+    {
+        $resources = $this->app['np.extension_manager']->collectMethodCalls('getResourceManifest');
+        foreach ($resources as $resource) {
+            if (0 === strpos($resource, '/js')) {
+                # code...
+                if (is_file($resource)) {
+                    file_get_contents($filename);
+                }
+            }
         }
+
+        $response = new Response($js);
+        $response->headers->set('Content-Type', 'application/javascript');
+
+        return $response;
     }
     
     /**
      * Dashboard
      */
-    public function dashboardAction(Application $app)
+    public function dashboardAction()
     {
-        return new Response($app['twig']->render('@core/admin/dashboard.twig'));
+        return new Response($this->app['twig']->render('@core/admin/dashboard.twig'));
+    }
+
+    /**
+     * Dashboard
+     */
+    public function moreSettingsAction()
+    {
+        return new Response($this->app['twig']->render('@core/admin/more_settings.twig'), array(
+            'toolbar' => $this->app['np.admin.toolbar']->getActiveItems()
+        ));
     }
     
-    public function sitemapAction(Request $request, Application $app)
+    public function sitemapAction(Request $request)
     {
-        $nodes = $app['db.orm.em']
+        $nodes = $this->app['db.orm.em']
             ->getRepository('NodePub\Model\Node')
             ->findAll();
         
-        return new Response($app['twig']->render('@core/admin/sitemap.twig', array(
+        return new Response($this->app['twig']->render('@core/admin/sitemap.twig', array(
             'nodes' => $nodes,
             'node_types' => array(),
             'components' => array()
         )));
     }
 
-    public function usersAction(Application $app)
+    public function usersAction()
     {
-        return $app->json(array('Users!' => array()));
+        return $this->app->json(array('Users!' => array()));
     }
 
-    public function userAction(Application $app)
+    public function userAction()
     {
-        return $app->json(array('User!' => array()));
+        return $this->app->json(array('User!' => array()));
     }
 
-    public function logAction(Application $app)
+    public function logAction()
     {
-        if (!file_exists($app['log_file'])) {
-            return 'no file in '.$app['log_file'];
+        if (!file_exists($this->app['log_file'])) {
+            return 'no file in '.$this->app['log_file'];
         }
 
-        $logContents = file_get_contents($app['log_file']);
+        $logContents = file_get_contents($this->app['log_file']);
         $logContents = $logContents ? $logContents : 'Log could not be loaded.';
 
-        return new Response($app['twig']->render('@core/admin/log.twig', array(
+        return new Response($this->app['twig']->render('@core/admin/log.twig', array(
             'log' => $logContents
         )));
     }
 
-    public function statsAction(Application $app)
+    public function statsAction()
     {
-        if (!file_exists($app['log_file'])) {
+        if (!file_exists($this->app['log_file'])) {
             return;
         }
 
-        $logLines = file($app['log_file']);
+        $logLines = file($this->app['log_file']);
         $events = array();
         $stats = array();
 
@@ -123,38 +162,38 @@ class AdminController
             return $b->count > $a->count ;
         });
 
-        return new Response($app['twig']->render('@core/admin/stats.twig', array(
+        return new Response($this->app['twig']->render('@core/admin/stats.twig', array(
             'events' => $events,
             'stats'  => $stats
         )));
     }
 
-    public function blocksAction(Application $app)
+    public function blocksAction()
     {
-        $blocks = $app['block_manager']->getInfo();
+        $blocks = $this->app['block_manager']->getInfo();
 
-        return $app['twig']->render('@core/admin/blocks.twig', array('blocks' => $blocks));
+        return $this->app['twig']->render('@core/admin/blocks.twig', array('blocks' => $blocks));
     }
 
-    public function installBlockAction(Request $request, Application $app, $blockNamespace)
+    public function installBlockAction(Request $request, $blockNamespace)
     {
 
-        $blockType = $app['block_manager']->findBlockType($blockNamespace);
+        $blockType = $this->app['block_manager']->findBlockType($blockNamespace);
 
         // Block is already installed
-        if ($blockType && $app['block_manager']->blockTypeTableExists($blockType->getTableName())) {
-            $app['session']->setFlash('info', $app['translator']->trans('installed.exists', array('%name%' => $blockNamespace . ' block')));
+        if ($blockType && $this->app['block_manager']->blockTypeTableExists($blockType->getTableName())) {
+            $this->app['session']->setFlash('info', $this->app['translator']->trans('installed.exists', array('%name%' => $blockNamespace . ' block')));
 
-            return $app->redirect($app['url_generator']->generate('admin_blocks'));
+            return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
         }
 
-        $blockType = $app['block_manager']->installBlock($blockNamespace);
+        $blockType = $this->app['block_manager']->installBlock($blockNamespace);
 
         // enable the block type for the current site
-        $app['site']->enableBlockType($blockType);
+        $this->app['site']->enableBlockType($blockType);
 
-        $app['db.orm.em']->persist($app['site']);
-        $app['db.orm.em']->flush();
+        $this->app['db.orm.em']->persist($this->app['site']);
+        $this->app['db.orm.em']->flush();
 
         if ($blockType) {
             $level = 'success';
@@ -165,21 +204,21 @@ class AdminController
 
         }
 
-        $app['session']->setFlash($level, $app['translator']->trans($transKey, array('%name%' => $blockNamespace . ' block')));
+        $this->app['session']->setFlash($level, $this->app['translator']->trans($transKey, array('%name%' => $blockNamespace . ' block')));
 
-        return $app->redirect($app['url_generator']->generate('admin_blocks'));
+        return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
     }
 
-    public function blockTypesAction(Request $request, Application $app)
+    public function blockTypesAction(Request $request)
     {
-        $blockTypes = $app['block_manager']->getEnabledBlockTypes();
+        $blockTypes = $this->app['block_manager']->getEnabledBlockTypes();
     }
 
-    public function clearCacheAction(Application $app, $all)
+    public function clearCacheAction($all)
     {
         # delete the cache for all sites or just the current site
         # depending on the flag in the url
-        $cacheDir = $all == 'all' ? $app['cache_dir'].'/..' : $app['cache_dir'];
+        $cacheDir = $all == 'all' ? $this->app['cache_dir'].'/..' : $this->app['cache_dir'];
 
         $files = Symfony\Component\Finder\Finder::create()
             ->files()
@@ -191,27 +230,27 @@ class AdminController
                 unlink($file->getRealPath());
             } catch (\Exception $e) {
                 # @TODO error logging, more response info
-                return $app->json(array('success' => false));
+                return $this->app->json(array('success' => false));
             }
         }
 
-        return $app->json(array('success' => true));
+        return $this->app->json(array('success' => true));
     }
 
-    public function installAction(Request $request, Application $app, $step = 1)
+    public function installAction(Request $request, $step = 1)
     {
         // TODO: schema tool will mess with all tables in the db,
         // don't use for final implementation
 
-        $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($app['db.orm.em']);
+        $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($this->app['db.orm.em']);
         $classes = array(
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\Site'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\SiteAttribute'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\Node'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\NodeAttribute'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\PublishState'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\Block'),
-            $app['db.orm.em']->getClassMetadata('NodePub\Model\BlockType')
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Site'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\SiteAttribute'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Node'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\NodeAttribute'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\PublishState'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Block'),
+            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\BlockType')
         );
 
         $schemaTool->dropDatabase();
@@ -226,7 +265,7 @@ class AdminController
             ->setDomainName('nodepub.com')
             ->setTemplate('@default/layout.twig');
 
-        $app['db.orm.em']->persist($site);
+        $this->app['db.orm.em']->persist($site);
         
         $siteDescription = new \NodePub\Model\SiteAttribute();
         $siteDescription
@@ -234,7 +273,7 @@ class AdminController
             ->setName('description')
             ->setValue('NodePub: A CMS that WON\'T kidnap and kill you');
             
-        $app['db.orm.em']->persist($siteDescription);
+        $this->app['db.orm.em']->persist($siteDescription);
 
         # ===================================================== #
         #    Create Publish States                              #
@@ -251,7 +290,7 @@ class AdminController
             $state = new \NodePub\Model\PublishState();
             $state->setName($name)
                 ->setDescription($desc);
-            $app['db.orm.em']->persist($state);
+            $this->app['db.orm.em']->persist($state);
 
             $publishStates[$name] = $state;
         }
@@ -260,10 +299,10 @@ class AdminController
         #    Create Core Block Types                            #
         # ===================================================== #
 
-        $htmlType = $app['block_manager']->installBlock('HTML');
+        $htmlType = $this->app['block_manager']->installBlock('HTML');
         $htmlType->setCore(true);
 
-        $markdownBlockType = $app['block_manager']->installBlock('Markdown');
+        $markdownBlockType = $this->app['block_manager']->installBlock('Markdown');
         $markdownBlockType->setCore(true);
 
         $site->enableBlockType($htmlType);
@@ -281,24 +320,24 @@ class AdminController
             ->setSite($site)
             ->setPublishState($publishStates['status.published'])
             ;
-        $app['db.orm.em']->persist($node);
+        $this->app['db.orm.em']->persist($node);
 
         $nodeDescription = new \NodePub\Model\NodeAttribute();
         $nodeDescription
             ->setNode($node)
             ->setName('description')
             ->setValue('This description overrides the Site description');
-        $app['db.orm.em']->persist($nodeDescription);
+        $this->app['db.orm.em']->persist($nodeDescription);
 
         $nodeTitle = new \NodePub\Model\NodeAttribute();
         $nodeTitle
             ->setNode($node)
             ->setName('title')
             ->setValue('This title overrides the Site title');
-        $app['db.orm.em']->persist($nodeTitle);
+        $this->app['db.orm.em']->persist($nodeTitle);
         
-        $app['db']->insert('np_html_blocks', array('content' => '<p>Welcome to NodePub</p>'));
-        $app['db']->insert('np_html_blocks', array('content' => '<p>This is an example of an editable block.</p>'));
+        $this->app['db']->insert('np_html_blocks', array('content' => '<p>Welcome to NodePub</p>'));
+        $this->app['db']->insert('np_html_blocks', array('content' => '<p>This is an example of an editable block.</p>'));
 
         $mainBlock = new \NodePub\Model\Block();
         $mainBlock
@@ -308,7 +347,7 @@ class AdminController
             ->setBlockType($htmlType)
             ->setNode($node);
 
-        $app['db.orm.em']->persist($mainBlock);
+        $this->app['db.orm.em']->persist($mainBlock);
 
         $sidebarBlock = new \NodePub\Model\Block();
         $sidebarBlock
@@ -318,30 +357,30 @@ class AdminController
             ->setBlockType($htmlType)
             ->setNode($node);
 
-        $app['db.orm.em']->persist($sidebarBlock);
+        $this->app['db.orm.em']->persist($sidebarBlock);
 
 
-        $app['db.orm.em']->flush();
+        $this->app['db.orm.em']->flush();
 
-        return $app->json(array('success' => true));
+        return $this->app->json(array('success' => true));
     }
 
-    public function testEmail(Request $request, Application $app)
+    public function testEmail(Request $request)
     {
         $emailMessageBody = $request->get('messageBody', 'This is an email test');
 
         try {
-            $emailMessage = $app['error_message'];
+            $emailMessage = $this->app['error_message'];
             $emailMessage->setBody($emailMessageBody, 'text/plain');
 
-            if ($status = $app['mailer']->send($emailMessage, $failures)) {
+            if ($status = $this->app['mailer']->send($emailMessage, $failures)) {
                 $statusMessage = 'Message was successfully sent';
             } else {
                 $statusMessage = 'Message could not sent to: '.implode(', ', $failures);
             }
         } catch (Exception $e) {
             $statusMessage = 'Error while attempting to send email';
-            $app['monolog']->addError(array(
+            $this->app['monolog']->addError(array(
                 'message'    => $statusMessage,
                 'error'      => $e->getMessage(),
             ));

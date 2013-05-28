@@ -6,12 +6,14 @@ class ToolbarItem
 {
     protected $name,
               $route,
+              $icon,
               $isActive;
 
-    function __construct($name, $route)
+    function __construct($name, $route, $icon)
     {
         $this->name = $name;
         $this->route = $route;
+        $this->icon = $icon;
     }
 
     public function getName()
@@ -27,6 +29,11 @@ class ToolbarItem
     public function getRoute()
     {
         return $this->route;
+    }
+
+    public function getIcon()
+    {
+        return $this->icon;
     }
 
     public function activate()
