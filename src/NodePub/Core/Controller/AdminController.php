@@ -5,6 +5,7 @@ namespace NodePub\Core\Controller;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class AdminController
 {
@@ -28,15 +29,67 @@ class AdminController
      */
     public function toolbarAction()
     {
-        // if (true !== $this->app['security']->isGranted('ROLE_ADMIN')) {
-        //     return new Response();
-        // }
-
         //$token = $this->app['security']->getToken();
         return new Response($this->app['twig']->render('@np-admin/_toolbar.twig', array(
             'username' => 'Andrew', //$token->getUser()->getUsername(),
             'toolbar' => $this->app['np.admin.toolbar']->getActiveItems(),
             'js_modules' => array()
+        )));
+    }
+
+    /**
+     * Dashboard
+     */
+    public function dashboardAction()
+    {
+        $actionMap = array(
+            array(
+                'Sites' => array(
+                    array('name' => 'Sites', 'route' => 'admin_sites')),
+                'Content' => array(
+                    array('name' => 'Sitemap', 'route' => 'admin_sitemap'),
+                    array('name' => 'Node Types', 'route' => 'admin_node_types')),
+                'Design' => array(
+                    array('name' => 'Themes', 'route' => 'admin_themes'),
+                    array('name' => 'Templates', 'route' => 'admin_templates'))
+            ),
+            array(
+                'Components' => array(
+                    array('name' => 'Blocks', 'route' => 'admin_blocks'),
+                    array('name' => 'Extensions', 'route' => 'admin_extensions')),
+                'Reports' => array(
+                    array('name' => 'Statistics', 'route' => 'admin_stats'),
+                    array('name' => 'Logs', 'route' => 'admin_logs'))
+            )
+        );
+
+        // Remove inactive actions if no admin route exists
+        foreach ($actionMap as $sectionKey => $section) {
+            foreach ($section as $header => $actions) {
+                foreach ($actions as $actionKey => $action) {
+                    try {
+                        $url = $this->app['url_generator']->generate($action['route']);
+                        $actionMap[$sectionKey][$header][$actionKey]['url'] = $url;
+                    } catch (RouteNotFoundException $e) {
+                        unset($actionMap[$sectionKey][$header][$actionKey]);
+                    }
+                }
+            }
+        }
+
+        return new Response($this->app['twig']->render('@np-admin/dashboard.twig', array(
+            'dashboard_actions' => $actionMap
+        )));
+    }
+
+    /**
+     * Settings
+     */
+    public function settingsAction()
+    {
+        sleep(3);
+        return new Response($this->app['twig']->render('@np-admin/settings.twig', array(
+            'settings' => $this->app['np.admin.toolbar']->getActiveItems()
         )));
     }
 
@@ -59,24 +112,6 @@ class AdminController
         $response->headers->set('Content-Type', 'application/javascript');
 
         return $response;
-    }
-    
-    /**
-     * Dashboard
-     */
-    public function dashboardAction()
-    {
-        return new Response($this->app['twig']->render('@core/admin/dashboard.twig'));
-    }
-
-    /**
-     * Dashboard
-     */
-    public function moreSettingsAction()
-    {
-        return new Response($this->app['twig']->render('@core/admin/more_settings.twig'), array(
-            'toolbar' => $this->app['np.admin.toolbar']->getActiveItems()
-        ));
     }
     
     public function sitemapAction(Request $request)
@@ -239,151 +274,10 @@ class AdminController
 
     public function installAction(Request $request, $step = 1)
     {
-        // TODO: schema tool will mess with all tables in the db,
-        // don't use for final implementation
+        $installer = new \NodePub\Core\Installer($this->app);
 
-        $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($this->app['db.orm.em']);
-        $classes = array(
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Site'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\SiteAttribute'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Node'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\NodeAttribute'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\PublishState'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\Block'),
-            $this->app['db.orm.em']->getClassMetadata('NodePub\Model\BlockType')
-        );
-
-        $schemaTool->dropDatabase();
-        $schemaTool->createSchema($classes);
-
-        # ===================================================== #
-        #    Create Default Site                                #
-        # ===================================================== #
-
-        $site = new \NodePub\Model\Site();
-        $site->setName('NodePub')
-            ->setDomainName('nodepub.com')
-            ->setTemplate('@default/layout.twig');
-
-        $this->app['db.orm.em']->persist($site);
-        
-        $siteDescription = new \NodePub\Model\SiteAttribute();
-        $siteDescription
-            ->setSite($site)
-            ->setName('description')
-            ->setValue('NodePub: A CMS that WON\'T kidnap and kill you');
-            
-        $this->app['db.orm.em']->persist($siteDescription);
-
-        # ===================================================== #
-        #    Create Publish States                              #
-        # ===================================================== #
-
-        $publishStates = array();
-        $stateDefinitions = array(
-            'status.draft' => 'status.draft.desc',
-            'status.published' => 'status.published.desc',
-            //'status.scheduled' => 'Publically viewable on set date.',
-            'status.archived' => 'status.archived.desc');
-
-        foreach ($stateDefinitions as $name => $desc) {
-            $state = new \NodePub\Model\PublishState();
-            $state->setName($name)
-                ->setDescription($desc);
-            $this->app['db.orm.em']->persist($state);
-
-            $publishStates[$name] = $state;
-        }
-
-        # ===================================================== #
-        #    Create Core Block Types                            #
-        # ===================================================== #
-
-        $htmlType = $this->app['block_manager']->installBlock('HTML');
-        $htmlType->setCore(true);
-
-        $markdownBlockType = $this->app['block_manager']->installBlock('Markdown');
-        $markdownBlockType->setCore(true);
-
-        $site->enableBlockType($htmlType);
-        $site->enableBlockType($markdownBlockType);
-
-        # ===================================================== #
-        #    Create Example Nodes                               #
-        # ===================================================== #
-
-        $node = new \NodePub\Model\Node();
-        $node->setTitle('Welcome')
-            ->setSlug('home')
-            ->setPath('home')
-            ->setTemplate('@default/layout.twig')
-            ->setSite($site)
-            ->setPublishState($publishStates['status.published'])
-            ;
-        $this->app['db.orm.em']->persist($node);
-
-        $nodeDescription = new \NodePub\Model\NodeAttribute();
-        $nodeDescription
-            ->setNode($node)
-            ->setName('description')
-            ->setValue('This description overrides the Site description');
-        $this->app['db.orm.em']->persist($nodeDescription);
-
-        $nodeTitle = new \NodePub\Model\NodeAttribute();
-        $nodeTitle
-            ->setNode($node)
-            ->setName('title')
-            ->setValue('This title overrides the Site title');
-        $this->app['db.orm.em']->persist($nodeTitle);
-        
-        $this->app['db']->insert('np_html_blocks', array('content' => '<p>Welcome to NodePub</p>'));
-        $this->app['db']->insert('np_html_blocks', array('content' => '<p>This is an example of an editable block.</p>'));
-
-        $mainBlock = new \NodePub\Model\Block();
-        $mainBlock
-            ->setAreaName('Main')
-            ->setOrder(1)
-            ->setBlockContentId(1)
-            ->setBlockType($htmlType)
-            ->setNode($node);
-
-        $this->app['db.orm.em']->persist($mainBlock);
-
-        $sidebarBlock = new \NodePub\Model\Block();
-        $sidebarBlock
-            ->setAreaName('Sidebar')
-            ->setOrder(1)
-            ->setBlockContentId(2)
-            ->setBlockType($htmlType)
-            ->setNode($node);
-
-        $this->app['db.orm.em']->persist($sidebarBlock);
-
-
-        $this->app['db.orm.em']->flush();
-
-        return $this->app->json(array('success' => true));
-    }
-
-    public function testEmail(Request $request)
-    {
-        $emailMessageBody = $request->get('messageBody', 'This is an email test');
-
-        try {
-            $emailMessage = $this->app['error_message'];
-            $emailMessage->setBody($emailMessageBody, 'text/plain');
-
-            if ($status = $this->app['mailer']->send($emailMessage, $failures)) {
-                $statusMessage = 'Message was successfully sent';
-            } else {
-                $statusMessage = 'Message could not sent to: '.implode(', ', $failures);
-            }
-        } catch (Exception $e) {
-            $statusMessage = 'Error while attempting to send email';
-            $this->app['monolog']->addError(array(
-                'message'    => $statusMessage,
-                'error'      => $e->getMessage(),
-            ));
+        if ($installer->install()) {
+            return $this->app->json(array('success' => true));
         }
     }
     
