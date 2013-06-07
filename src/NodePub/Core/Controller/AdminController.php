@@ -24,9 +24,15 @@ class AdminController
         return $this->app->redirect($this->app['url_generator']->generate('admin_dashboard'));
     }
 
-    /**
-     * Toolbar
-     */
+    public function installAction(Request $request, $step = 1)
+    {
+        $installer = new \NodePub\Core\Installer($this->app);
+
+        if ($installer->install()) {
+            return $this->app->json(array('success' => true));
+        }
+    }
+
     public function toolbarAction()
     {
         //$token = $this->app['security']->getToken();
@@ -37,9 +43,6 @@ class AdminController
         )));
     }
 
-    /**
-     * Dashboard
-     */
     public function dashboardAction()
     {
         $actionMap = array(
@@ -82,9 +85,14 @@ class AdminController
         )));
     }
 
-    /**
-     * Settings
-     */
+    public function sitesAction()
+    {
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Sites',
+            'content' => 'TODO'
+        ));
+    }
+
     public function settingsAction()
     {
         sleep(3);
@@ -116,25 +124,36 @@ class AdminController
     
     public function sitemapAction(Request $request)
     {
-        $nodes = $this->app['db.orm.em']
-            ->getRepository('NodePub\Model\Node')
-            ->findAll();
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Sitemap',
+            'content' => 'TODO'
+        ));
+
+        // $nodes = $this->app['db.orm.em']
+        //     ->getRepository('NodePub\Model\Node')
+        //     ->findAll();
         
-        return new Response($this->app['twig']->render('@core/admin/sitemap.twig', array(
-            'nodes' => $nodes,
-            'node_types' => array(),
-            'components' => array()
-        )));
+        // return new Response($this->app['twig']->render('@core/admin/sitemap.twig', array(
+        //     'nodes' => $nodes,
+        //     'node_types' => array(),
+        //     'components' => array()
+        // )));
     }
 
     public function usersAction()
     {
-        return $this->app->json(array('Users!' => array()));
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Users',
+            'content' => 'TODO'
+        ));
     }
 
     public function userAction()
     {
-        return $this->app->json(array('User!' => array()));
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Users > Foo',
+            'content' => 'TODO'
+        ));
     }
 
     public function logAction()
@@ -203,53 +222,63 @@ class AdminController
         )));
     }
 
-    public function blocksAction()
-    {
-        $blocks = $this->app['block_manager']->getInfo();
+    // TODO: move to admin blocks controller
 
-        return $this->app['twig']->render('@core/admin/blocks.twig', array('blocks' => $blocks));
+    // public function blocksAction()
+    // {
+    //     $blocks = $this->app['block_manager']->getInfo();
+
+    //     return $this->app['twig']->render('@core/admin/blocks.twig', array('blocks' => $blocks));
+    // }
+
+    // public function installBlockAction(Request $request, $blockNamespace)
+    // {
+
+    //     $blockType = $this->app['block_manager']->findBlockType($blockNamespace);
+
+    //     // Block is already installed
+    //     if ($blockType && $this->app['block_manager']->blockTypeTableExists($blockType->getTableName())) {
+    //         $this->app['session']->setFlash('info', $this->app['translator']->trans('installed.exists', array('%name%' => $blockNamespace . ' block')));
+
+    //         return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
+    //     }
+
+    //     $blockType = $this->app['block_manager']->installBlock($blockNamespace);
+
+    //     // enable the block type for the current site
+    //     $this->app['site']->enableBlockType($blockType);
+
+    //     $this->app['db.orm.em']->persist($this->app['site']);
+    //     $this->app['db.orm.em']->flush();
+
+    //     if ($blockType) {
+    //         $level = 'success';
+    //         $transKey = 'installed.success';
+    //     } else {
+    //         $level = 'error';
+    //         $transKey = 'installed.error';
+
+    //     }
+
+    //     $this->app['session']->setFlash($level, $this->app['translator']->trans($transKey, array('%name%' => $blockNamespace . ' block')));
+
+    //     return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
+    // }
+
+    // public function blockTypesAction(Request $request)
+    // {
+    //     $blockTypes = $this->app['block_manager']->getEnabledBlockTypes();
+    // }
+
+    public function cacheAction()
+    {
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Cache',
+            'content' => 'TODO'
+        ));
     }
 
-    public function installBlockAction(Request $request, $blockNamespace)
-    {
-
-        $blockType = $this->app['block_manager']->findBlockType($blockNamespace);
-
-        // Block is already installed
-        if ($blockType && $this->app['block_manager']->blockTypeTableExists($blockType->getTableName())) {
-            $this->app['session']->setFlash('info', $this->app['translator']->trans('installed.exists', array('%name%' => $blockNamespace . ' block')));
-
-            return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
-        }
-
-        $blockType = $this->app['block_manager']->installBlock($blockNamespace);
-
-        // enable the block type for the current site
-        $this->app['site']->enableBlockType($blockType);
-
-        $this->app['db.orm.em']->persist($this->app['site']);
-        $this->app['db.orm.em']->flush();
-
-        if ($blockType) {
-            $level = 'success';
-            $transKey = 'installed.success';
-        } else {
-            $level = 'error';
-            $transKey = 'installed.error';
-
-        }
-
-        $this->app['session']->setFlash($level, $this->app['translator']->trans($transKey, array('%name%' => $blockNamespace . ' block')));
-
-        return $this->app->redirect($this->app['url_generator']->generate('admin_blocks'));
-    }
-
-    public function blockTypesAction(Request $request)
-    {
-        $blockTypes = $this->app['block_manager']->getEnabledBlockTypes();
-    }
-
-    public function clearCacheAction($all)
+    public function postClearCacheAction($all)
     {
         # delete the cache for all sites or just the current site
         # depending on the flag in the url
@@ -270,15 +299,6 @@ class AdminController
         }
 
         return $this->app->json(array('success' => true));
-    }
-
-    public function installAction(Request $request, $step = 1)
-    {
-        $installer = new \NodePub\Core\Installer($this->app);
-
-        if ($installer->install()) {
-            return $this->app->json(array('success' => true));
-        }
     }
     
     /**

@@ -27,10 +27,10 @@ class CoreExtension extends Extension
     public function getToolbarItems() {
         return array(
             new ToolbarItem('Dashboard', 'admin_dashboard', 'dashboard'),
-            //new ToolbarItem('Sites', 'admin_sites', 'asterisk'),
+            new ToolbarItem('Sites', 'admin_sites', 'asterisk'),
             new ToolbarItem('Pages', 'admin_sitemap', 'sitemap'),
             new ToolbarItem('Users', 'admin_users', 'user'),
-            new ToolbarItem('Cache', 'admin_clear_cache', 'bolt'),
+            new ToolbarItem('Cache', 'admin_cache', 'bolt'),
             // new ToolbarItem('Extensions', 'admin_extensions', 'puzzle-piece')
         );
     }

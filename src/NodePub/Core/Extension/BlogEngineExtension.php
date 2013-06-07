@@ -20,7 +20,7 @@ class BlogEngineExtension extends Extension
 
     public function getToolbarItems() {
         return array(
-            new ToolbarItem('Blog', 'blog_admin', 'comment'),
+            new ToolbarItem('Blog', 'admin_blog', 'comment'),
         );
     }
 }
