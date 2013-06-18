@@ -17,10 +17,11 @@ class SiteController
 
     public function sitesAction()
     {
-        $sites = $this->app['np.sites.provider']->findAll();
-        
-        return new Response($this->app['twig']->render('@core/admin/sites.twig', array(
-            'sites' => $sites
-        )));
+        $sites = $this->app['np.sites.provider']->getAll();
+
+        return $this->app['twig']->render('@np-admin/panel.twig', array(
+            'nav' => 'Sites',
+            'content' => 'TODO'
+        ));
     }
 }

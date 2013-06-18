@@ -23,9 +23,6 @@ class AdminControllerProvider implements ControllerProviderInterface
         $controllers->get('/dashboard', 'np.admin.controller:dashboardAction')
             ->bind('admin_dashboard');
 
-        $controllers->get('/sites', 'np.admin.controller:sitesAction')
-            ->bind('admin_sites');
-
         $controllers->get('/settings', 'np.admin.controller:settingsAction')
             ->bind('admin_settings');
 

@@ -85,14 +85,6 @@ class AdminController
         )));
     }
 
-    public function sitesAction()
-    {
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Sites',
-            'content' => 'TODO'
-        ));
-    }
-
     public function settingsAction()
     {
         sleep(3);

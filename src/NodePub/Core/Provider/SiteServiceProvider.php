@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Provider;
+namespace NodePub\Core\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -10,12 +10,12 @@ use NodePub\Core\Config\YamlConfigurationProvider;
 /**
  * Provides multisite configuration
  */
-class SiteServiceProvider implements ServiceProviderInterface
+class SiteServiceProvider implements ServiceProviderInterface 
 {
     public function register(Application $app)
     {
         $app['np.sites.debug'] = false;
-        $app['np.sites.config_file'] = '';
+        $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
         $app['np.sites.site_class'] = 'NodePub\Core\Model\Site';
 
         $app['np.sites.provider'] = $app->share(function($app) {
@@ -23,7 +23,7 @@ class SiteServiceProvider implements ServiceProviderInterface
         });
 
         $app['np.sites'] = $app->share(function($app) {
-            return $app['np.sites.provider']->getSites();
+            return $app['np.sites.provider']->getAll();
         });
 
         $app['np.sites.active'] = $app->share(function($app) {
@@ -35,7 +35,11 @@ class SiteServiceProvider implements ServiceProviderInterface
                 $hostName = str_replace('.dev', '.com', $hostName);
             }
 
-            return $app['np.sites.provider']->get($hostName);
+            if (!$site = $app['np.sites.provider']->get($hostName)) {
+                throw new \Exception("No site configured for host {$hostName}", 500);
+            }
+
+            return $site;
         });
 
         $app['np.sites.mount_point'] = $app->share(function($app) {
@@ -53,7 +57,7 @@ class SiteServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
-        $siteProvider = function($hostName) use($app) {
+        $siteConverter = function($hostName) use($app) {
             if (!$site = $app['np.sites.provider']->get($hostName)) {
                 throw new \Exception("Site not found", 404);
             }
@@ -71,7 +75,7 @@ class SiteServiceProvider implements ServiceProviderInterface
             ->bind('admin_sites');
 
         $siteControllers->match('/{hostName}/settings', 'np.sites.controller:settingsAction')
-            ->convert('hostName', $siteProvider)
+            ->convert('hostName', $siteConverter)
             ->bind('admin_site_settings');
 
         $app->mount($app['np.sites.mount_point'], $siteControllers);
