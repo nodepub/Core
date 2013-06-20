@@ -3,8 +3,6 @@
 namespace NodePub\Core\Controller;
 
 use Silex\Application;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class SiteController
 {
@@ -17,11 +15,19 @@ class SiteController
 
     public function sitesAction()
     {
-        $sites = $this->app['np.sites.provider']->getAll();
-
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Sites',
-            'content' => 'TODO'
+        return $this->app['twig']->render('@np-admin/panels/sites.twig', array(
+            'sites' =>  $this->app['np.sites.provider']->getAll()
         ));
+    }
+
+    public function settingsAction($site)
+    {
+        return $this->app['twig']->render('@np-admin/panels/site.twig', array(
+            'site' => $site
+        ));
+    }
+
+    public function switchSiteAction($site)
+    {
     }
 }

@@ -3,6 +3,7 @@
 namespace NodePub\Core\Extension;
 
 use NodePub\Core\Extension\ExtensionInterface;
+use NodePub\Core\Extension\ExtensionContainer;
 use Silex\Application;
 
 abstract class Extension implements ExtensionInterface

@@ -10,21 +10,13 @@ use Silex\Application;
  */
 class SnippetQueue
 {
-    protected $app;
     protected $queue;
     protected $addjquery;
     protected $matchedComments;
 
-    public function __construct(Application $app)
+    public function __construct()
     {
-        $this->app = $app;
         $this->matchedComments = array();
-
-        // if (isset($app['config']['general']['add_jquery']) && $app['config']['general']['add_jquery'] == true) {
-        //     $this->addjquery = true;
-        // } else {
-        //     $this->addjquery = false;
-        // }
     }
 
     public function addJquery()
@@ -35,7 +27,7 @@ class SnippetQueue
     public function addCss($url)
     {
         $this->insertSnippet(
-            self::AFTER_CSS,
+            DomManipulator::AFTER_CSS,
             sprintf('<link rel="stylesheet" href="%s" media="screen">', $url)
         );
     }
@@ -43,7 +35,7 @@ class SnippetQueue
     public function addJavaScript($url)
     {
         $this->insertSnippet(
-            self::AFTER_JS,
+            DomManipulator::AFTER_JS,
             sprintf('<script src="%s"></script>', $url)
         );
     }
@@ -63,7 +55,10 @@ class SnippetQueue
         );
     }
 
-    public function processAll($html)
+    /**
+     * @TODO: see if we really need $app injected
+     */
+    public function processAll(Application $app, $html)
     {
         // Replace html <!-- comments --> with placeholders
         $html = $this->replaceAndStashComments($html);
@@ -71,20 +66,20 @@ class SnippetQueue
         $domManipulator = new DomManipulator();
         $insertionMethods = $domManipulator->getInsertionMethodsMap();
 
-        foreach ($this->queue as $snippetObj) {
+        foreach ($this->queue as $snippet) {
 
             // Get the snippet, either by using a callback function,
             // or else use the passed string as-is
-            if (function_exists($snippetObj['callback'])) {
-                $snippetString = call_user_func($snippetObj['callback'], $this->app);
+            if (function_exists($snippet['callback'])) {
+                $snippetString = call_user_func($snippet['callback'], $app);
             } else {
-                $snippetString = $snippetObj['callback'];
+                $snippetString = $snippet['callback'];
             }
 
-            if (isset($insertionMethods[$snippetObj['location']])
-                && method_exists($domManipulator, $insertionMethods[$snippetObj['location']])) {
+            if (isset($insertionMethods[$snippet['location']])
+                && method_exists($domManipulator, $insertionMethods[$snippet['location']])) {
 
-                $method = $insertionMethods[$snippetObj['location']];
+                $method = $insertionMethods[$snippet['location']];
                 $html = call_user_func(array($domManipulator, $method), $snippetString, $html);
             } else {
                 $html .= $snippetString."\n";

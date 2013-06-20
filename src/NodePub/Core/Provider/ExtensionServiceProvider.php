@@ -2,8 +2,9 @@
 
 namespace NodePub\Core\Provider;
 
-use NodePub\Core\Extension\ExtensionManager;
+use NodePub\Core\Extension\ExtensionContainer;
 use NodePub\Core\Extension\ThemeEngineExtension;
+use NodePub\Core\Extension\DomManipulator;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -14,29 +15,30 @@ class ExtensionServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['np.extension_manager'] = $app->share(function($app) {
-            $manager = new ExtensionManager($app);
-            return $manager;
+        $app['np.extensions'] = $app->share(function($app) {
+            return new ExtensionContainer(array(
+                'admin' => $app['np.admin'],
+                'toolbar' => $app['np.admin.toolbar']
+            ));
         });
 
-        $app['np.extensions'] = $app->share(function($app) {
-            return array(
-                new ThemeEngineExtension($app),
-            );
-        });
+        $app['np.extensions'] = $app->share($app->extend('np.extensions', function($extensions, $app) {
+            $extensions->register(new ThemeEngineExtension($app));
+            return $extensions;
+        }));
     }
 
     public function boot(Application $app)
     {
-        foreach ($app['np.extensions'] as $extension) {
-            $app['np.extension_manager']->register($extension);
-        }
-
-        $app['np.extension_manager']->boot();
+        $app['np.extensions']->boot();
 
         $app->after(function(Request $request, Response $response) use ($app) {
-            $app['np.extension_manager']->prepareAdminContent();
-            $app['np.extension_manager']->insertSnippets($response);
+
+            $app['np.extensions']->prepareSnippets();
+
+            $response->setContent(
+                $app['np.extensions']['snippet_queue']->processAll($app, $response->getContent())
+            );
         });
     }
 }

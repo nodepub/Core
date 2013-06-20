@@ -6,6 +6,7 @@ use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Controller\DebugController;
 use NodePub\Core\Provider\AdminControllerProvider;
 use NodePub\Core\Provider\DebugControllerProvider;
+use NodePub\Core\Provider\AdminControllerMounter;
 
 use NodePub\Core\Model\Toolbar;
 use NodePub\ThemeEngine\ThemeEvents;
@@ -31,6 +32,11 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 
         // theme to use for the admin ui
         $app['np.admin.theme'] = 'np-admin';
+
+        // factory for creating admin route uris
+        $app['np.admin.route_prefix'] = function() use ($app) {
+            return new AdminRoutePrefixFactory($app['np.admin.mount_point']);
+        };
 
         // initialize empty toolbar,
         // extensions will register individual toolbar items

@@ -22,6 +22,15 @@ class Toolbar
         return $this;
     }
 
+    function addItems(array $items)
+    {
+        foreach ($items as $item) {
+            $this->addItem($item);
+        }
+
+        return $this;
+    }
+
     /**
      * Returns array of active toolbar items
      * @return array

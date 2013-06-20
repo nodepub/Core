@@ -15,6 +15,7 @@ class SiteServiceProvider implements ServiceProviderInterface
     public function register(Application $app)
     {
         $app['np.sites.debug'] = false;
+        $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
         $app['np.sites.site_class'] = 'NodePub\Core\Model\Site';
 
@@ -42,14 +43,6 @@ class SiteServiceProvider implements ServiceProviderInterface
             return $site;
         });
 
-        $app['np.sites.mount_point'] = $app->share(function($app) {
-            $mountPoint = '/sites';
-            if (isset($app['np.admin.mount_point'])) {
-                $mountPoint = $app['np.admin.mount_point'] . $mountPoint;
-            }
-            return $mountPoint;
-        });
-
         $app['np.sites.controller'] = $app->share(function($app) {
             return new SiteController($app);
         });
@@ -57,6 +50,7 @@ class SiteServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
+        // Convert hostname into site object
         $siteConverter = function($hostName) use($app) {
             if (!$site = $app['np.sites.provider']->get($hostName)) {
                 throw new \Exception("Site not found", 404);
@@ -74,10 +68,17 @@ class SiteServiceProvider implements ServiceProviderInterface
         $siteControllers->get('/', 'np.sites.controller:sitesAction')
             ->bind('admin_sites');
 
-        $siteControllers->match('/{hostName}/settings', 'np.sites.controller:settingsAction')
-            ->convert('hostName', $siteConverter)
-            ->bind('admin_site_settings');
+        $siteControllers->match('/{site}/settings', 'np.sites.controller:settingsAction')
+            ->convert('site', $siteConverter)
+            ->bind('admin_site');
 
-        $app->mount($app['np.sites.mount_point'], $siteControllers);
+        $siteControllers->post('/switch/{site}', 'np.sites.controller:switchSiteAction')
+            ->convert('site', $siteConverter)
+            ->bind('admin_sites_switch');
+
+        $app->mount(
+            $app['np.admin.route_prefix']->create($app['np.sites.mount_point']),
+            $siteControllers
+        );
     }
 }
