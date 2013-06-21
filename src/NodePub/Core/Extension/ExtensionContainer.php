@@ -41,8 +41,6 @@ class ExtensionContainer extends \Pimple
     public function register(ExtensionInterface $extension)
     {
         $this->extensions[$extension->getName()] = $extension;
-        //$extension->register($this);
-
         return $this;
     }
 

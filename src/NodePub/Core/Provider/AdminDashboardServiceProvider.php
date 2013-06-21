@@ -4,9 +4,8 @@ namespace NodePub\Core\Provider;
 
 use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Controller\DebugController;
-use NodePub\Core\Provider\AdminControllerProvider;
-use NodePub\Core\Provider\DebugControllerProvider;
-use NodePub\Core\Provider\AdminControllerMounter;
+use NodePub\Core\Routing\AdminRouting;
+use NodePub\Core\Routing\DebugRouting;
 
 use NodePub\Core\Model\Toolbar;
 use NodePub\ThemeEngine\ThemeEvents;
@@ -97,10 +96,10 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         #    ADMIN ROUTES                                       #
         # ===================================================== #
 
-        $app->mount($app['np.admin.mount_point'], new AdminControllerProvider());
+        $app->mount($app['np.admin.mount_point'], new AdminRouting());
 
         if ($app['debug']) {
-            $app->mount($app['np.admin.mount_point'].'/debug', new DebugControllerProvider());
+            $app->mount($app['np.admin.mount_point'].'/debug', new DebugRouting());
         }
     }
 }

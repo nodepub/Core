@@ -3,7 +3,6 @@
 namespace NodePub\Core\Provider;
 
 use NodePub\Core\Extension\ExtensionContainer;
-use NodePub\Core\Extension\ThemeEngineExtension;
 use NodePub\Core\Extension\DomManipulator;
 
 use Silex\Application;
@@ -21,11 +20,6 @@ class ExtensionServiceProvider implements ServiceProviderInterface
                 'toolbar' => $app['np.admin.toolbar']
             ));
         });
-
-        $app['np.extensions'] = $app->share($app->extend('np.extensions', function($extensions, $app) {
-            $extensions->register(new ThemeEngineExtension($app));
-            return $extensions;
-        }));
     }
 
     public function boot(Application $app)

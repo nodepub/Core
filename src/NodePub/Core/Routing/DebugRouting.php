@@ -1,11 +1,11 @@
 <?php
 
-namespace NodePub\Core\Provider;
+namespace NodePub\Core\Routing;
 
 use Silex\Application;
 use Silex\ControllerProviderInterface;
 
-class DebugControllerProvider implements ControllerProviderInterface
+class DebugRouting implements ControllerProviderInterface
 {
     public function connect(Application $app)
     {

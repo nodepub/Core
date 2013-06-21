@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Core\Provider;
+namespace NodePub\Core\Routing;
 
 use Silex\Application;
 use Silex\ControllerProviderInterface;
@@ -13,7 +13,7 @@ use Silex\ControllerProviderInterface;
 // update    PUT      /posts/:id       admin_blog_update_post
 // destroy   DELETE   /posts/:id       admin_blog_delete_post
 
-class BlogAdminControllerProvider implements ControllerProviderInterface
+class BlogAdminRouting implements ControllerProviderInterface
 {
     public function connect(Application $app)
     {

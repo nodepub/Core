@@ -3,7 +3,7 @@
 namespace NodePub\Core\Provider;
 
 use NodePub\Core\Controller\BlogAdminController;
-use NodePub\Core\Provider\BlogAdminControllerProvider;
+use NodePub\Core\Routing\BlogAdminRouting;
 use NodePub\BlogEngine\PostManager;
 
 use Silex\Application;
@@ -42,10 +42,10 @@ class BlogAdminServiceProvider implements ServiceProviderInterface
 
         $app->mount(
             $app['np.admin.route_prefix']->create($app['np.blog_admin.mount_point']),
-            new BlogAdminControllerProvider()
+            new BlogAdminRouting()
         );
 
-        //$app->mount($app['np.blog_admin.mount_point'].'/drafts', new BlogAdminControllerProvider());
+        //$app->mount($app['np.blog_admin.mount_point'].'/drafts', new BlogAdminRouting());
 
         // create an index shortcut
         $app->get(
