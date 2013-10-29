@@ -9,6 +9,7 @@ use NodePub\Core\Routing\DebugRouting;
 
 use NodePub\Core\Model\Toolbar;
 use NodePub\ThemeEngine\ThemeEvents;
+use NodePub\Install\InstallerManager;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -49,6 +50,10 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 
         $app['np.debug.controller'] = $app->share(function($app) {
             return new DebugController($app);
+        });
+        
+        $app['np.installer'] = $app->share(function($app) {
+            return new InstallerManager($app);
         });
     }
 

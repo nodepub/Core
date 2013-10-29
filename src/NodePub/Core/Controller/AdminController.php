@@ -26,10 +26,17 @@ class AdminController
 
     public function installAction(Request $request, $step = 1)
     {
-        $installer = new \NodePub\Core\Installer($this->app);
-
-        if ($installer->install()) {
-            return $this->app->json(array('success' => true));
+        // check if already installed
+        
+        if (isset($this->app['np.installer'])) {
+            try {
+                $this->app['np.installer']->install();
+                return new Response('installed!');
+            } catch (\Exception $e) {
+                return new Response($e->getMessage(), 500);
+            }
+        } else {
+            return new Response('No installer configured', 500);
         }
     }
 
