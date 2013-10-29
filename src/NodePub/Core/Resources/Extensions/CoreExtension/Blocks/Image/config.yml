@@ -1,0 +1,9 @@
+name: Image
+description: Add an uploaded image.
+namespace: Image
+model_schema:
+  url: text
+  width: int
+  height: int
+  class: string
+  title: string

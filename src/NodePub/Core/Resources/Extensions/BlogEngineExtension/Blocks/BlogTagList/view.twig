@@ -1,0 +1,14 @@
+<div id="block_{{ blockId }}" class="tag_list">
+    <h3>{{ heading|default('Tags') }}</h3>
+    <ul>
+        {% for tag in tags %}
+            {% if tag.count > 1 %}
+                <li>
+                    <a href="{{ path('get_tag_index', {tag: tag.slug}) }}">{{ tag.name }}
+                        <span class="tag_count">({{ tag.count }})</span>
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

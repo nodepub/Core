@@ -1,0 +1,30 @@
+name: NodePub Core
+
+toolbar_items:
+  Dashboard:
+    route: admin_dashboard
+    icon: dashboard
+  Sites:
+    route: admin_sites
+    icon: asterisk
+  Pages:
+    route: admin_sitemap
+    icon: sitemap
+  Users:
+    route: admin_users
+    icon: user
+  Cache:
+    route: admin_cache
+    icon: bolt
+  Extensions:
+    route: admin_extensions
+    icon: puzzle-piece
+
+block_types:
+  - HTML
+  - Image
+  - Markdown
+
+resources:
+  - /js/np/toolbar.js
+  - /js/np/panel.js

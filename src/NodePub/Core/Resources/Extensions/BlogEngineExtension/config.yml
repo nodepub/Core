@@ -1,0 +1,8 @@
+name: NodePub Blog
+toolbar_items:
+  Blog:
+    route: admin_blog
+    icon: comment
+block_types:
+  - BlogTagList
+  - RecentPosts

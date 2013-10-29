@@ -1,0 +1,5 @@
+name: HTML
+description: Simple HTML block
+namespace: HTML
+model_schema:
+  content: text

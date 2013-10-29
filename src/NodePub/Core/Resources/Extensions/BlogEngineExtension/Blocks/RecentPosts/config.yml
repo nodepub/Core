@@ -1,0 +1,5 @@
+name: Recent Posts
+description: Displays a list of recent blog posts
+namespace: RecentPosts
+model_schema:
+  post_limit: int

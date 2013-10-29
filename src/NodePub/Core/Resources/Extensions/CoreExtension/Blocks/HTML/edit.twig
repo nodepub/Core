@@ -1,0 +1,20 @@
+{% extends '@core/admin/panel.twig' %}
+
+{% block nav %}Editing Block{% endblock %}
+
+{% block content %}
+    <form action="{{ path('admin_update_block', {id: id }) }}" method="post" {{ form_enctype(form) }}>
+
+        {{ form_errors(form) }}
+
+        <div>
+            {{ form_errors(form.content) }}
+            {{ form_widget(form.content) }}
+        </div>
+
+        {{ form_rest(form) }}
+
+        <a href="#" class="btn">Cancel</a>
+        <input type="submit" class="btn btn-primary" value="Save Changes" />
+    </form>
+{% endblock %}
