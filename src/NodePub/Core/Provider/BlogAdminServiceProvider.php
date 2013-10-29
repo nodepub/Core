@@ -2,19 +2,19 @@
 
 namespace NodePub\Core\Provider;
 
+use NodePub\Core\Provider\BaseServiceProvider;
 use NodePub\Core\Controller\BlogAdminController;
 use NodePub\Core\Routing\BlogAdminRouting;
 use NodePub\BlogEngine\PostManager;
 
 use Silex\Application;
-use Silex\ServiceProviderInterface;
 
 /**
  * Service Provider that registers blog admin settings and routes
  */
-class BlogAdminServiceProvider implements ServiceProviderInterface
+class BlogAdminServiceProvider extends BaseServiceProvider
 {
-    public function register(Application $app)
+    public function registerAdmin(Application $app)
     {
         $app['np.blog_admin.mount_point'] = '/blog';
         $app['np.blog_admin.post_limit'] = 15;
@@ -34,7 +34,7 @@ class BlogAdminServiceProvider implements ServiceProviderInterface
         });
     }
 
-    public function boot(Application $app)
+    public function bootAdmin(Application $app)
     {
         # ===================================================== #
         #    BLOG ADMIN ROUTES                                  #

@@ -18,6 +18,14 @@ abstract class Extension implements ExtensionInterface
 
     public abstract function getResourceDirectory();
 
+    public function isActive() {
+        return false;
+    }
+
+    public function isCore() {
+        return false;
+    }
+
     public function getResourceManifest() {
         return array();
     }

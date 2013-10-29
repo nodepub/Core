@@ -23,4 +23,11 @@ class BlogEngineExtension extends Extension
             new ToolbarItem('Blog', 'admin_blog', 'comment'),
         );
     }
+
+    public function getBlockTypes() {
+        return array(
+            'BlogTagList',
+            'RecentPosts'
+        );
+    }
 }

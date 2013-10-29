@@ -4,6 +4,9 @@ namespace NodePub\Core\Provider;
 
 use Silex\Application;
 
+/**
+ * Prepends a base uri segment to a route uri
+ */
 class AdminRoutePrefixFactory
 {
     protected $basePrefix;

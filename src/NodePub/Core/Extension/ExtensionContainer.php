@@ -88,6 +88,11 @@ class ExtensionContainer extends \Pimple
         throw new \Exception("No extension found with name [$extensionName]");
     }
 
+    public function getAll()
+    {
+        return $this->extensions;
+    }
+
     // /**
     //  * Calls a method on each extension and collects the results in an array.
     //  *

@@ -31,7 +31,7 @@ class CoreExtension extends Extension
             new ToolbarItem('Pages', 'admin_sitemap', 'sitemap'),
             new ToolbarItem('Users', 'admin_users', 'user'),
             new ToolbarItem('Cache', 'admin_cache', 'bolt'),
-            // new ToolbarItem('Extensions', 'admin_extensions', 'puzzle-piece')
+            new ToolbarItem('Extensions', 'admin_extensions', 'puzzle-piece')
         );
     }
 
