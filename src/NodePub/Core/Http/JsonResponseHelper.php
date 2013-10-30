@@ -1,11 +1,11 @@
 <?php
 
-namespace NodePub\Core;
+namespace NodePub\Core\Http;
 
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * A helper for preparing JSON responses with preformatted success and errors
+ * A helper for preparing JSON responses with pre-formatted success and errors
  */
 class JsonResponseHelper
 {

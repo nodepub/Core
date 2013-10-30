@@ -1,13 +1,14 @@
 <?php
 
-namespace NodePub\Install;
+namespace NodePub\Core\Install;
 
 use Doctrine\ORM\Tools\SchemaTool;
-use NodePub\Install\InstallerInterface;
+use NodePub\Core\Install\InstallerInterface;
 use Silex\Application;
 
 /**
- * 
+ * Allows installers from other modules to register for installation,
+ * and runs the installation of each.
  */
 class InstallerManager
 {
@@ -34,16 +35,21 @@ class InstallerManager
     public function register(InstallerInterface $installer)
     {
         $this->subInstallers[] = $installer;
-        array_merge($this->entityClasses, $installer->getEntityClasses());
+        $this->entityClasses = array_merge($this->entityClasses, $installer->getEntityClasses());
     }
     
     protected function createSchema()
     {
-        $classes = array();
+        // $classes = array();
+        // foreach (array_unique($this->entityClasses) as $className) {
+        //     $classes[] = $this->app['orm.em']->getClassMetadata($className);
+        // }
         
-        foreach ($this->entityClasses as $className) {
-            $classes[] = $this->app['orm.em']->getClassMetadata($className);
-        }
+        $em = $this->app['orm.em'];
+        
+        $classes = array_map(function($className) use ($em) {
+            return $em->getClassMetadata($className);
+        }, array_unique($this->entityClasses));
         
         $schemaTool = new SchemaTool($this->app['orm.em']);
         $schemaTool->dropDatabase();

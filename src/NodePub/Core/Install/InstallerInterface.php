@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Install;
+namespace NodePub\Core\Install;
 
 interface InstallerInterface
 {

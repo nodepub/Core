@@ -5,27 +5,39 @@ namespace NodePub\Core\Model;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * Site Model
+ * @Entity
+ * @Table(name="np_sites")
  */
 class Site
 {
     /**
-     * @var integer
+     * @Id @Column(type="integer", nullable=false) @GeneratedValue(strategy="IDENTITY")
      */
     private $id;
 
     /**
-     * @var string
+     * @Column(type="string", length=256, nullable=false)
      */
     private $name;
 
     /**
-     * @var string
+     * @Column(type="string", length=250, name="host_name", nullable=false, unique=true)
      */
     private $hostName;
+    
+    /**
+     * @Column(name="created_at", type="datetime", nullable=false)
+     */
+    private $createdAt;
+
+    /**
+     * @Column(name="updated_at", type="datetime", nullable=false)
+     */
+    private $updatedAt;
 
     /**
      * @var ArrayCollection
+     * @todo enable SiteAttribute relation
      */
     private $attributes;
 

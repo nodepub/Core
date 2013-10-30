@@ -5,7 +5,7 @@ namespace NodePub\Core\Config;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Loads and saves custom theme settings to a yaml file
+ * Loads and saves settings to a yaml file
  */
 class YamlConfigurationProvider
 {

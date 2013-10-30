@@ -1,16 +1,17 @@
 <?php
 
-namespace NodePub\Install;
+namespace NodePub\Core\Install;
 
 use NodePub\Install\InstallerInterface;
-use NodePub\Model\Site;
-use NodePub\Model\SiteAttribute;
-use NodePub\Model\Node;
-use NodePub\Model\Block;
-use NodePub\Model\PublishState;
+use NodePub\Core\Model\Site;
+use NodePub\Core\Model\SiteAttribute;
+use NodePub\Core\Model\Node;
+use NodePub\Core\Model\Block;
+use NodePub\Core\Model\PublishState;
 
 /**
- * 
+ * Installs the core db tables, populated with the params
+ * entered in installation ui steps
  */
 class CoreInstaller implements InstallerInterface
 {
@@ -37,7 +38,7 @@ class CoreInstaller implements InstallerInterface
     }
 
     public function install()
-    {        
+    {
         $this->createDefaultSite();
         $this->createExampleNodes();
         $this->createPublishStates();
