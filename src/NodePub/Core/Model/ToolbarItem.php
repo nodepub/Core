@@ -2,6 +2,10 @@
 
 namespace NodePub\Core\Model;
 
+/**
+ * Represents a single item in the NodePub admin toolbar
+ * that has a name, icon (a Font Awesome class name), and an admin action.
+ */
 class ToolbarItem
 {
     protected $name,
@@ -9,6 +13,11 @@ class ToolbarItem
               $icon,
               $isActive;
 
+    /**
+     * @param string $name
+     * @param string $route
+     * @param string $icon A Font Awesome icon class name
+     */
     function __construct($name, $route, $icon)
     {
         $this->name = $name;

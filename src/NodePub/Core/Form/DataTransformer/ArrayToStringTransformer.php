@@ -7,19 +7,27 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class ArrayToStringTransformer implements DataTransformerInterface
 {
-    # TODO make this a configurable param?
-    const SEPARATOR = ', ';
+    protected $delimiter;
+    
+    public function __construct($delimiter = ',')
+    {
+        $this->delimiter = $delimiter;
+    }
 
     /**
      * Transforms array to string
      */
     public function transform($val)
     {
+        if (null === $val) {
+            return '';
+        }
+        
         if ($val instanceof ArrayCollection) {
             $val = $val->toArray();
         }
-
-        return is_array($val) ? implode(self::SEPARATOR, $val) : '';
+        
+        return is_array($val) ? implode($this->delimiter, $val) : '';
     }
 
     /**
@@ -27,10 +35,12 @@ class ArrayToStringTransformer implements DataTransformerInterface
      */
     public function reverseTransform($val)
     {
-        if (empty($val)) {
-            return array();
+        if (!$val) {
+            return null;
         }
-        
-        return explode(self::SEPARATOR, $val);
+
+        return array_map(function($item) {
+            return trim($item);
+        }, explode($this->delimiter, $val));
     }
 }

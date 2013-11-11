@@ -4,18 +4,19 @@ namespace NodePub\Core\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class PostType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('title', 'text');
-        $builder->add('slug', 'text');
-        $builder->add('rawContent', 'textarea', array(
-            'label' => 'Content'
-        ));
-        
-        //$builder->add('tags', 'text_tags');
+        $builder
+            ->add('title', 'text');
+            ->add('slug', 'text');
+            ->add('rawContent', 'textarea', array(
+                'label' => 'Content'
+            ))
+            ->add('tags', 'text_tags');
     }
 
     public function getName()
@@ -23,10 +24,10 @@ class PostType extends AbstractType
         return 'post';
     }
     
-    public function getDefaultOptions(array $options)
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        return array(
-            'data_class' => 'NodePub\BlogEngine\Post'
-        );
+        $resolver->setDefaults(array(
+            'data_class' => 'NodePub\BlogEngine\Post',
+        ));
     }
 }

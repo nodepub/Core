@@ -1,21 +1,15 @@
 {
     "name": "nodepub/core",
-    "description": "A small example implementation of NodePub themable blog engine",
+    "description": "The core components for NodePub CMS",
     "keywords": ["silex", "twig", "cms"],
     "license": "MIT",
     "authors": [
         {"name": "Andrew Gruner", "email": "andrew.gruner@gmail.com"}
     ],
     "minimum-stability": "dev",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/nodepub/ThemeEngine"
-        }
-    ],
     "require": {
         "php": ">=5.3.3",
-        "silex/silex": "1.0.*@dev",
+        "silex/silex": "~1.1",
         "twig/twig": ">=1.10,<2.0-dev",
         "symfony/twig-bridge": "~2.3",
         "symfony/finder": "~2.3",
@@ -27,6 +21,8 @@
         "symfony/validator": "~2.3",
         "symfony/yaml": "~2.3",
         "monolog/monolog": ">=1.0.0",
+        "cocur/slugify": "dev-master",
+        "nodepub/common": "*",
         "nodepub/theme-engine": "*"
     }
 }

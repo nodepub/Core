@@ -6,6 +6,7 @@ use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Controller\DebugController;
 use NodePub\Core\Routing\AdminRouting;
 use NodePub\Core\Routing\DebugRouting;
+use NodePub\Core\Provider\RoutePrefixFactory;
 
 use NodePub\Core\Model\Toolbar;
 use NodePub\ThemeEngine\ThemeEvents;
@@ -35,7 +36,7 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 
         // factory for creating admin route uris
         $app['np.admin.route_prefix'] = function() use ($app) {
-            return new AdminRoutePrefixFactory($app['np.admin.mount_point']);
+            return new RoutePrefixFactory($app['np.admin.mount_point']);
         };
 
         // initialize empty toolbar,

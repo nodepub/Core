@@ -5,7 +5,7 @@ namespace NodePub\Core\Model;
 use NodePub\Core\Model\ToolbarItem;
 
 /**
- * Holds the toolbar items and manages their order
+ * Holds a collection of ToolbarItem objects, and manages their order.
  */
 class Toolbar
 {
