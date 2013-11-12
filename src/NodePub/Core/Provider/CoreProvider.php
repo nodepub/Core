@@ -6,6 +6,7 @@ use Silex\Application;
 use Silex\ServiceProviderInterface;
 use NodePub\Core\Yaml\YamlCollectionLoader;
 use NodePub\Core\Form\Type\TextTagsType;
+use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
 
 /**
  * Provides multisite configuration
@@ -18,12 +19,30 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app['cache_dir']  = $app['app_dir'].'/_cache';
         $app['log_dir']    = $app['app_dir'].'/_logs';
         $app['web_dir']    = $app['app_dir'].'/../web';
-        $app['host_name']  = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST']: 'nodepub.dev';
-        
         $app['np.homepage_route'] = 'blog_get_posts';
         
+        $app['host_name'] = $app->share(function($app) {
+            
+            // need a fallback for when running from cli (tests, etc.)
+            $hostName = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST']: 'nodepub.dev';
+            
+            // If local development is running on a .dev hostname
+            // automatically set debug mode, but to avoid having different local configs
+            // set the name back to what it will be in production (defaults to .com)
+            if (array_pop(explode('.', $app['host_name'])) == 'dev') {
+                $app['debug'] = true;
+                $hostName = str_replace('.dev', '.com', $hostName);
+            }
+            
+            return $hostName;
+        });
+        
         $app['np.yaml_loader'] = $app->share(function($app) {
-            return new YamlCollectionLoader($app['config_dir']);
+            $loader = new YamlCollectionLoader($app['config_dir']);
+            if ($app['debug'] && is_dir($app['app_dir'].'/stubs')) {
+                $loader->addSource($app['app_dir'].'/stubs');
+            }
+            return $loader;
         });
         
         # ===================================================== #
@@ -34,7 +53,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new \Silex\Provider\ServiceControllerServiceProvider());
         $app->register(new \Silex\Provider\SessionServiceProvider());
         $app->register(new \Silex\Provider\FormServiceProvider(), array(
-            'form.secret' => md5('I call the big one Bitey')
+            'form.secret' => md5('This needs to be configured!')
         ));
         // Register custom form types
         $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
@@ -51,7 +70,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new \Silex\Provider\TwigServiceProvider(), array(
             'twig.options'    => array(
                 'autoescape' => false,
-                'cache' => false
+                'cache' => !$app['debug'],
             )
         ));
         
@@ -62,6 +81,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
+        $app->register(new ThemeServiceProvider());
     }
 
     public function boot(Application $app)

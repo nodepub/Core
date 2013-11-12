@@ -16,14 +16,29 @@ class Site
     private $id;
 
     /**
-     * @Column(type="string", length=256, nullable=false)
-     */
-    private $name;
-
-    /**
      * @Column(type="string", length=250, name="host_name", nullable=false, unique=true)
      */
     private $hostName;
+    
+    /**
+     * @Column(type="string", length=256)
+     */
+    private $title;
+    
+    /**
+     * @Column(type="string", length=256)
+     */
+    private $tagline;
+    
+    /**
+     * @Column(type="text")
+     */
+    private $description;
+    
+    /**
+     * @Column(type="string", length=256, nullable=false)
+     */
+    private $theme;
     
     /**
      * @Column(name="created_at", type="datetime", nullable=false)
@@ -51,29 +66,11 @@ class Site
     # ===================================================== #
 
     /**
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName($name)
-    {   
-        $this->name = $name;
-        
-        return $this;
-    }
-
-    /**
-     * @return string 
-     */
-    public function getName()
-    {
-        return $this->name;
     }
 
     /**
@@ -93,7 +90,91 @@ class Site
     {
         return $this->hostName;
     }
+    
+    /**
+     * @param string $title
+     */
+    public function setTitle(title)
+    {   
+        $this->title = title;
+        
+        return $this;
+    }
 
+    /**
+     * @return string 
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+    
+    /**
+     * @param string $tagline
+     */
+    public function setTagline(tagline)
+    {   
+        $this->tagline = tagline;
+        
+        return $this;
+    }
+
+    /**
+     * @return string 
+     */
+    public function getTagline()
+    {
+        return $this->tagline;
+    }
+    
+    /**
+     * @param string $description
+     */
+    public function setDescription(description)
+    {   
+        $this->description = description;
+        
+        return $this;
+    }
+
+    /**
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+    
+    /**
+     * @param string $theme
+     */
+    public function setTheme(theme)
+    {   
+        $this->theme = theme;
+        
+        return $this;
+    }
+
+    /**
+     * @return string 
+     */
+    public function getTheme()
+    {
+        return $this->theme;
+    }
+    
+    /**
+     * @return mixed
+     */
+    public function addAttribute($name, $value)
+    {
+        if (!$this->attributes->find($name)) {
+            $this->attributes->add($name, $value);
+        }
+        
+        return $this;
+    }
+    
     /**
      * @return mixed
      */

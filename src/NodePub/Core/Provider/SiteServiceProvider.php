@@ -5,7 +5,8 @@ namespace NodePub\Core\Provider;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use NodePub\Core\Controller\SiteController;
-use NodePub\Core\Config\YamlConfigurationProvider;
+use NodePub\Common\Yaml\YamlConfigurationProvider;
+use NodePub\Core\Model\SiteCollection;
 
 /**
  * Provides multisite configuration
@@ -17,10 +18,14 @@ class SiteServiceProvider implements ServiceProviderInterface
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
-        $app['np.sites.site_class'] = 'NodePub\Core\Model\Site';
+        
+        // don't remember what this was for - remove if not needed
+        //$app['np.sites.site_class'] = 'NodePub\Core\Model\Site';
 
         $app['np.sites.provider'] = $app->share(function($app) {
             return new YamlConfigurationProvider($app['np.sites.config_file']);
+            
+            return new SiteCollection();
         });
 
         $app['np.sites'] = $app->share(function($app) {
@@ -28,15 +33,8 @@ class SiteServiceProvider implements ServiceProviderInterface
         });
 
         $app['np.sites.active'] = $app->share(function($app) {
-            
-            $hostName = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'example.com';
 
-            if (array_pop(explode('.', $app['host_name'])) == 'dev') {
-                $app['debug'] = true;
-                $hostName = str_replace('.dev', '.com', $hostName);
-            }
-
-            if (!$site = $app['np.sites.provider']->get($hostName)) {
+            if (!$site = $app['np.sites.provider']->getByHostName($app['host_name'])) {
                 throw new \Exception("No site configured for host {$hostName}", 500);
             }
 
@@ -52,7 +50,7 @@ class SiteServiceProvider implements ServiceProviderInterface
     {
         // Convert hostname into site object
         $siteConverter = function($hostName) use($app) {
-            if (!$site = $app['np.sites.provider']->get($hostName)) {
+            if (!$site = $app['np.sites.provider']->getByHostName($hostName)) {
                 throw new \Exception("Site not found", 404);
             }
 
