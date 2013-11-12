@@ -68,6 +68,9 @@ class SiteCollection
         return $this;
     }
     
+    /**
+     * Adds sites to the collection from a configuration array
+     */
     public function addSitesFromConfig($siteConfig)
     {
         foreach ($siteConfig as $hostName => $config) {

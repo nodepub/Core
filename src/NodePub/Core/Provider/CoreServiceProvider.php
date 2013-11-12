@@ -9,7 +9,8 @@ use NodePub\Core\Form\Type\TextTagsType;
 use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
 
 /**
- * Provides multisite configuration
+ * Initializes other core Service Providers -- those built-in to Silex,
+ * as well as the ones specific to NodePub.
  */
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -87,7 +88,7 @@ class CoreServiceProvider implements ServiceProviderInterface
     public function boot(Application $app)
     {
         # ===================================================== #
-        #    ROUTES                                             #
+        #    DEFAULT ROUTES                                     #
         # ===================================================== #
 
         $app->get('/', function() use ($app) {

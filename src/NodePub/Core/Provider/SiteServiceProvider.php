@@ -18,14 +18,12 @@ class SiteServiceProvider implements ServiceProviderInterface
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
-        
-        // don't remember what this was for - remove if not needed
-        //$app['np.sites.site_class'] = 'NodePub\Core\Model\Site';
 
+        // Loading from a yaml file for now, would like to be able to keep yaml site configuration
+        // or have it all in the db for editing, which will override np.site.provider with a db entity manager
         $app['np.sites.provider'] = $app->share(function($app) {
-            return new YamlConfigurationProvider($app['np.sites.config_file']);
-            
-            return new SiteCollection();
+            $sitesProvider = new SiteCollection();
+            $sitesProvider->addSitesFromConfig($app['np.yaml_loader']->load($app['np.sites.config_file']));
         });
 
         $app['np.sites'] = $app->share(function($app) {

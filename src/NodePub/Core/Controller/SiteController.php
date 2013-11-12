@@ -2,6 +2,7 @@
 
 namespace NodePub\Core\Controller;
 
+use NodePub\Core\Model\Site;
 use Silex\Application;
 
 class SiteController
@@ -20,14 +21,14 @@ class SiteController
         ));
     }
 
-    public function settingsAction($site)
+    public function settingsAction(Site $site)
     {
         return $this->app['twig']->render('@np-admin/panels/site.twig', array(
             'site' => $site
         ));
     }
 
-    public function switchSiteAction($site)
+    public function switchSiteAction(Site $site)
     {
     }
 }
