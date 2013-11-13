@@ -20,13 +20,14 @@ class SiteServiceProvider extends BaseServiceProvider
         
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
-        $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
+        $app['np.sites.config_file'] = $app['np.config_dir'].'/sites.yml';
 
         // Loading from a yaml file for now, would like to be able to keep yaml site configuration
         // or have it all in the db for editing, which will override np.site.provider with a db entity manager
         $app['np.sites.provider'] = $app->share(function($app) {
             $sitesProvider = new SiteCollection();
             $sitesProvider->addSitesFromConfig($app['np.yaml_loader']->load($app['np.sites.config_file']));
+            return $sitesProvider;
         });
 
         $app['np.sites'] = $app->share(function($app) {
@@ -35,7 +36,7 @@ class SiteServiceProvider extends BaseServiceProvider
 
         $app['np.sites.active_site'] = $app->share(function($app) {
 
-            if (!$site = $app['np.sites.provider']->getByHostName($app['host_name'])) {
+            if (!$site = $app['np.sites.provider']->getByHostName($app['np.host_name'])) {
                 throw new \Exception("No site configured for host {$hostName}", 500);
             }
 

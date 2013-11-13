@@ -4,7 +4,7 @@ namespace NodePub\Core\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-use NodePub\Core\Yaml\YamlCollectionLoader;
+use NodePub\Common\Yaml\YamlCollectionLoader;
 use NodePub\Core\Form\Type\TextTagsType;
 use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
 use Symfony\Component\EventDispatcher\Event;
@@ -18,13 +18,13 @@ class CoreServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['config_dir'] = $app['app_dir'].'/config';
-        $app['cache_dir']  = $app['app_dir'].'/_cache';
-        $app['log_dir']    = $app['app_dir'].'/_logs';
-        $app['web_dir']    = $app['app_dir'].'/../web';
+        $app['np.config_dir'] = $app['np.app_dir'].'/config';
+        $app['np.cache_dir']  = $app['np.app_dir'].'/_cache';
+        $app['np.log_dir']    = $app['np.app_dir'].'/_logs';
+        $app['np.web_dir']    = $app['np.app_dir'].'/../web';
         $app['np.homepage_route'] = 'blog_get_posts';
         
-        $app['host_name'] = $app->share(function($app) {
+        $app['np.host_name'] = $app->share(function($app) {
             
             // need a fallback for when running from cli (tests, etc.)
             $hostName = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST']: 'nodepub.dev';
@@ -32,7 +32,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             // If local development is running on a .dev hostname
             // automatically set debug mode, but to avoid having different local configs
             // set the name back to what it will be in production (defaults to .com)
-            if (array_pop(explode('.', $app['host_name'])) == 'dev') {
+            if (array_pop(explode('.', $hostName)) == 'dev') {
                 $app['debug'] = true;
                 $hostName = str_replace('.dev', '.com', $hostName);
             }
@@ -41,9 +41,9 @@ class CoreServiceProvider implements ServiceProviderInterface
         });
         
         $app['np.yaml_loader'] = $app->share(function($app) {
-            $loader = new YamlCollectionLoader($app['config_dir']);
-            if ($app['debug'] && is_dir($app['app_dir'].'/stubs')) {
-                $loader->addSource($app['app_dir'].'/stubs');
+            $loader = new YamlCollectionLoader($app['np.config_dir']);
+            if ($app['debug'] && is_dir($app['np.app_dir'].'/stubs')) {
+                $loader->addSource($app['np.app_dir'].'/stubs');
             }
             return $loader;
         });
@@ -58,6 +58,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new \Silex\Provider\FormServiceProvider(), array(
             'form.secret' => md5('This needs to be configured!')
         ));
+        
         // Register custom form types
         $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
             $extensions[] = new TextTagsType();
@@ -68,7 +69,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         ));
         $app->register(new \Silex\Provider\MonologServiceProvider(), array(
             'monolog.name' => 'np',
-            'monolog.logfile' => $app['log_dir'].'/dev.log',
+            'monolog.logfile' => $app['np.log_dir'].'/dev.log',
         ));
         $app->register(new \Silex\Provider\TwigServiceProvider(), array(
             'twig.options'    => array(

@@ -94,9 +94,9 @@ class Site
     /**
      * @param string $title
      */
-    public function setTitle(title)
+    public function setTitle($title)
     {   
-        $this->title = title;
+        $this->title = $title;
         
         return $this;
     }
@@ -112,9 +112,9 @@ class Site
     /**
      * @param string $tagline
      */
-    public function setTagline(tagline)
+    public function setTagline($tagline)
     {   
-        $this->tagline = tagline;
+        $this->tagline = $tagline;
         
         return $this;
     }
@@ -130,9 +130,9 @@ class Site
     /**
      * @param string $description
      */
-    public function setDescription(description)
+    public function setDescription($description)
     {   
-        $this->description = description;
+        $this->description = $description;
         
         return $this;
     }
@@ -148,9 +148,9 @@ class Site
     /**
      * @param string $theme
      */
-    public function setTheme(theme)
+    public function setTheme($theme)
     {   
-        $this->theme = theme;
+        $this->theme = $theme;
         
         return $this;
     }
@@ -168,7 +168,7 @@ class Site
      */
     public function addAttribute($name, $value)
     {
-        if (!$this->attributes->find($name)) {
+        if (!$this->attributes->offsetExists($name)) {
             $this->attributes->add($name, $value);
         }
         
@@ -180,7 +180,7 @@ class Site
      */
     public function getAttribute($name, $defaultValue = null)
     {
-        if ($attr = $this->attributes->find($name)) {
+        if ($attr = $this->attributes->get($name)) {
             return $attr;
         } else {
             return $defaultValue;
