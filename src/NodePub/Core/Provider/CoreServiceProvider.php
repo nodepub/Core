@@ -7,6 +7,8 @@ use Silex\ServiceProviderInterface;
 use NodePub\Core\Yaml\YamlCollectionLoader;
 use NodePub\Core\Form\Type\TextTagsType;
 use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
+use Symfony\Component\EventDispatcher\Event;
+use NodePub\ThemeEngine\ThemeEvents;
 
 /**
  * Initializes other core Service Providers -- those built-in to Silex,
@@ -82,11 +84,58 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
-        $app->register(new ThemeServiceProvider());
+        $app->register(new ThemeServiceProvider(), array(
+            'np.theme.active' => $app['np.sites.active_site']->getTheme()
+        ));
     }
 
     public function boot(Application $app)
     {
+        // Listen for theme activation and configure the relevant blog templates
+        $app->on(ThemeEvents::THEME_ACTIVATE, function(Event $event) use ($app) {
+
+            // We may want some kind of registry or ThemeTemplateResolver object
+            // that uses theme's configuration to map its templates to common page types,
+            // otherwise all themes have to use exact template names,
+            // and there's no way to share a template for different page types, or fallback on a parent theme
+
+            $theme = $event->getTheme();
+
+            $name = $theme->getNamespace();
+            
+            // @TODO: $theme->getTemplates();
+            // -define core page types,
+            // each theme will define a template for each page type
+            // default will be used for unknown types
+    
+            $app['np.blog.theme.options'] = array(
+                'templates' => array(
+                    'default'   => '@'.$name.'/blog_post.twig',
+                    'frontpage' => '@'.$name.'/blog_index.twig',
+                    'post'      => '@'.$name.'/blog_post.twig',
+                    'tag_page'  => '@'.$name.'/blog_index.twig',
+                    'category'  => '@'.$name.'/blog_index.twig',
+                    'archive'   => '@'.$name.'/blog_archive.twig',
+                )
+            );
+
+            $app['np.theme.templates.custom_css'] = '@'.$name.'/_styles.css.twig';
+
+            // for standalone usage, use the theme layout
+            // $app['np.admin.template'] = '@'.$name.'/layout.twig';
+            // for full np app use panel
+            $app['np.admin.template'] = '@np-admin/panel.twig';
+
+            // set active theme's parent
+            if ($parentName = $theme->getParentNamespace()) {
+                if ($parent = $app['np.theme.manager']->getTheme($parentName)) {
+                    $theme->setParent($parent);
+                }
+            }
+
+            $theme->customize($app['np.theme.configuration_provider']->get($name));
+        });
+        
         # ===================================================== #
         #    DEFAULT ROUTES                                     #
         # ===================================================== #

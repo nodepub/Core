@@ -3,18 +3,21 @@
 namespace NodePub\Core\Provider;
 
 use Silex\Application;
-use Silex\ServiceProviderInterface;
+
+use NodePub\Core\Provider\BaseServiceProvider;
 use NodePub\Core\Controller\SiteController;
-use NodePub\Common\Yaml\YamlConfigurationProvider;
 use NodePub\Core\Model\SiteCollection;
+use NodePub\Common\Yaml\YamlConfigurationProvider;
 
 /**
  * Provides multisite configuration
  */
-class SiteServiceProvider implements ServiceProviderInterface 
+class SiteServiceProvider extends BaseServiceProvider
 {
     public function register(Application $app)
     {
+        parent::register($app);
+        
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['config_dir'].'/sites.yml';
@@ -30,7 +33,7 @@ class SiteServiceProvider implements ServiceProviderInterface
             return $app['np.sites.provider']->getAll();
         });
 
-        $app['np.sites.active'] = $app->share(function($app) {
+        $app['np.sites.active_site'] = $app->share(function($app) {
 
             if (!$site = $app['np.sites.provider']->getByHostName($app['host_name'])) {
                 throw new \Exception("No site configured for host {$hostName}", 500);
@@ -38,13 +41,26 @@ class SiteServiceProvider implements ServiceProviderInterface
 
             return $site;
         });
-
+    }
+    
+    public function registerAdmin(Application $app)
+    {
         $app['np.sites.controller'] = $app->share(function($app) {
             return new SiteController($app);
         });
     }
 
     public function boot(Application $app)
+    {
+        parent::boot($app);
+        
+        $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
+            $twig->addGlobal('site', $app['np.sites.active_site']);
+            return $twig;
+        }));
+    }
+    
+    public function bootAdmin(Application $app)
     {
         // Convert hostname into site object
         $siteConverter = function($hostName) use($app) {

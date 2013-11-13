@@ -26,7 +26,7 @@ class BlogAdminServiceProvider extends BaseServiceProvider
         });
 
         $app['np.blog_admin.controller'] = $app->share(function($app) {
-            return new BlogAdminController($app, $app['blog.post_manager']);
+            return new BlogAdminController($app, $app['np.blog.post_manager']);
         });
 
         $app['np.blog_admin.draft_controller'] = $app->share(function($app) {
