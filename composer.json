@@ -20,5 +20,8 @@
         "cocur/slugify"       : "dev-master",
         "dflydev/markdown"    : "1.0.*",
         "nodepub/theme-engine": "*"
+    },
+    "autoload": {
+        "psr-0": { "NodePub\\Core": "src/" }
     }
 }
