@@ -4,11 +4,22 @@ namespace NodePub\Core\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+
 use NodePub\Common\Yaml\YamlCollectionLoader;
-use NodePub\Core\Form\Type\TextTagsType;
-use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
-use Symfony\Component\EventDispatcher\Event;
+use NodePub\Core\Bootstraper;
+use NodePub\Core\Config\ApplicationConfiguration;
+use NodePub\Core\Event\ThemeActivateListener;
 use NodePub\ThemeEngine\ThemeEvents;
+use NodePub\Core\Form\Type\TextTagsType;
+use NodePub\Core\Provider\AdminDashboardServiceProvider;
+use NodePub\Core\Provider\AdminRoutesServiceProvider;
+use NodePub\Core\Provider\ExtensionServiceProvider;
+use NodePub\Core\Provider\SiteServiceProvider;
+use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
+
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Initializes other core Service Providers -- those built-in to Silex,
@@ -48,17 +59,35 @@ class CoreServiceProvider implements ServiceProviderInterface
             return $loader;
         });
         
-        # ===================================================== #
-        #    SILEX SERVICE PROVIDERS                            #
-        # ===================================================== #
-
+        $app['np.app_config'] = $app->share(function($app) {
+            $processor = new Processor();
+            $appConfig = new ApplicationConfiguration();
+            
+            return $processor->processConfiguration(
+                $appConfig,
+                array(Yaml::parse($app['np.config_dir'] . '/app.yml'))
+            );
+        });
+        
+        // display admin controlls
+        $app['np.admin'] = $app->share(function($app) {
+            return true; //(isset($app['security']) && true === $app['security']->isGranted('ROLE_ADMIN'));
+        });
+        
+        $this->bootstrapSilex($app);
+        $this->bootstrapNodePub($app);
+    }
+    
+    public function bootstrapSilex(Application $app)
+    {
         $app->register(new \Silex\Provider\UrlGeneratorServiceProvider());
         $app->register(new \Silex\Provider\ServiceControllerServiceProvider());
         $app->register(new \Silex\Provider\SessionServiceProvider());
         $app->register(new \Silex\Provider\FormServiceProvider(), array(
-            'form.secret' => md5('This needs to be configured!')
+            // make sure that each site gets a different hash
+            'form.secret' => md5($app['np.host_name'] . $app['np.app_config']['form']['secret'])
         ));
-        
+    
         // Register custom form types
         $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
             $extensions[] = new TextTagsType();
@@ -77,11 +106,11 @@ class CoreServiceProvider implements ServiceProviderInterface
                 'cache' => !$app['debug'],
             )
         ));
-        
-        # ===================================================== #
-        #    NP SERVICE PROVIDERS                               #
-        # ===================================================== #
-
+    }
+    
+    public function bootstrapNodePub(Application $app)
+    {
+        $app->register(new AdminControllersServiceProvider());
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
@@ -92,50 +121,12 @@ class CoreServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
-        // Listen for theme activation and configure the relevant blog templates
-        $app->on(ThemeEvents::THEME_ACTIVATE, function(Event $event) use ($app) {
-
-            // We may want some kind of registry or ThemeTemplateResolver object
-            // that uses theme's configuration to map its templates to common page types,
-            // otherwise all themes have to use exact template names,
-            // and there's no way to share a template for different page types, or fallback on a parent theme
-
-            $theme = $event->getTheme();
-
-            $name = $theme->getNamespace();
-            
-            // @TODO: $theme->getTemplates();
-            // -define core page types,
-            // each theme will define a template for each page type
-            // default will be used for unknown types
-    
-            $app['np.blog.theme.options'] = array(
-                'templates' => array(
-                    'default'   => '@'.$name.'/blog_post.twig',
-                    'frontpage' => '@'.$name.'/blog_index.twig',
-                    'post'      => '@'.$name.'/blog_post.twig',
-                    'tag_page'  => '@'.$name.'/blog_index.twig',
-                    'category'  => '@'.$name.'/blog_index.twig',
-                    'archive'   => '@'.$name.'/blog_archive.twig',
-                )
-            );
-
-            $app['np.theme.templates.custom_css'] = '@'.$name.'/_styles.css.twig';
-
-            // for standalone usage, use the theme layout
-            // $app['np.admin.template'] = '@'.$name.'/layout.twig';
-            // for full np app use panel
-            $app['np.admin.template'] = '@np-admin/panel.twig';
-
-            // set active theme's parent
-            if ($parentName = $theme->getParentNamespace()) {
-                if ($parent = $app['np.theme.manager']->getTheme($parentName)) {
-                    $theme->setParent($parent);
-                }
-            }
-
-            $theme->customize($app['np.theme.configuration_provider']->get($name));
-        });
+        # ===================================================== #
+        #    EVENT LISTENERS                                    #
+        # ===================================================== #
+        
+        $themeActivateListener = new ThemeActivateListener($app);
+        $app->on(ThemeEvents::THEME_ACTIVATE, array($themeActivateListener, 'onThemeActivate'));
         
         # ===================================================== #
         #    DEFAULT ROUTES                                     #

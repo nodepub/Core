@@ -23,6 +23,11 @@ class Site
     /**
      * @Column(type="string", length=256)
      */
+    private $url;
+    
+    /**
+     * @Column(type="string", length=256)
+     */
     private $title;
     
     /**
@@ -89,6 +94,24 @@ class Site
     public function getHostName()
     {
         return $this->hostName;
+    }
+    
+    /**
+     * @param string $hostName
+     */
+    public function setUrl($url)
+    {   
+        $this->url = $url;
+        
+        return $this;
+    }
+
+    /**
+     * @return string 
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
     
     /**

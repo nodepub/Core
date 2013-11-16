@@ -23,21 +23,11 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        // display admin controlls
-        $app['np.admin'] = $app->share(function($app) {
-            return (isset($app['security']) && true === $app['security']->isGranted('ROLE_ADMIN'));
-        });
-
-        // base url for all admin routes
-        $app['np.admin.mount_point'] = '/np-admin';
-
         // theme to use for the admin ui
         $app['np.admin.theme'] = 'np-admin';
-
-        // factory for creating admin route uris
-        $app['np.admin.route_prefix'] = function() use ($app) {
-            return new RoutePrefixFactory($app['np.admin.mount_point']);
-        };
+        
+        // admin theme template
+        $app['np.admin.template'] = '@np-admin/panel.twig';
 
         // initialize empty toolbar,
         // extensions will register individual toolbar items
@@ -56,6 +46,17 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         $app['np.installer'] = $app->share(function($app) {
             return new InstallerManager($app);
         });
+        
+        if ($app['debug'] && isset($app['np.admin']) && true === $app['np.admin']) {
+            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
+                
+                $debugControllers = new DebugRouting();
+                $debugControllers = $debugControllers->connect($app);
+                
+                $controllers->mount('/debug', $debugControllers);
+                return $controllers;
+            }));
+        }
     }
 
     public function boot(Application $app)
@@ -97,15 +98,8 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         //         }
         //     });
         // });
-
-        # ===================================================== #
-        #    ADMIN ROUTES                                       #
-        # ===================================================== #
-
-        $app->mount($app['np.admin.mount_point'], new AdminRouting());
-
-        if ($app['debug']) {
-            $app->mount($app['np.admin.mount_point'].'/debug', new DebugRouting());
-        }
+        
+        // Because it's at the root admin prefix we mount it directly instead of adding it to the admin controllers
+        $app->mount($app['np.admin.controllers.prefix'], new AdminRouting());
     }
 }

@@ -2,19 +2,19 @@
 
 namespace NodePub\Core\Provider;
 
-use NodePub\Core\Provider\BaseServiceProvider;
+use Silex\Application;
+use Silex\ServiceProviderInterface;
+
 use NodePub\Core\Controller\BlogAdminController;
 use NodePub\Core\Routing\BlogAdminRouting;
 use NodePub\BlogEngine\PostManager;
 
-use Silex\Application;
-
 /**
  * Service Provider that registers blog admin settings and routes
  */
-class BlogAdminServiceProvider extends BaseServiceProvider
+class BlogAdminServiceProvider implements ServiceProviderInterface
 {
-    public function registerAdmin(Application $app)
+    public function register(Application $app)
     {
         $app['np.blog_admin.mount_point'] = '/blog';
         $app['np.blog_admin.post_limit'] = 15;
@@ -32,25 +32,29 @@ class BlogAdminServiceProvider extends BaseServiceProvider
         $app['np.blog_admin.draft_controller'] = $app->share(function($app) {
             return new BlogAdminController($app, $app['np.blog_admin.draft_manager'] );
         });
+        
+        if (isset($app['np.admin']) && true === $app['np.admin']) {
+            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
+                
+                $blogControllers = new BlogAdminRouting();
+                $blogControllers = $blogControllers->connect($app);
+                
+                $controllers->mount($app['np.blog_admin.mount_point'], $blogControllers);
+                return $controllers;
+            }));
+        }
     }
 
-    public function bootAdmin(Application $app)
+    public function boot(Application $app)
     {
         # ===================================================== #
         #    BLOG ADMIN ROUTES                                  #
         # ===================================================== #
 
-        $app->mount(
-            $app['np.admin.route_prefix']->create($app['np.blog_admin.mount_point']),
-            new BlogAdminRouting()
-        );
-
-        //$app->mount($app['np.blog_admin.mount_point'].'/drafts', new BlogAdminRouting());
-
         // create an index shortcut
-        $app->get(
-            $app['np.admin.route_prefix']->create($app['np.blog_admin.mount_point']),
-            'np.blog_admin.controller:dashboardAction'
-        )->bind('admin_blog');
+        // $app->get(
+        //     $app['np.admin.route_prefix']->create($app['np.blog_admin.mount_point']),
+        //     'np.blog_admin.controller:dashboardAction'
+        // )->bind('admin_blog');
     }
 }

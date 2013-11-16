@@ -77,6 +77,7 @@ class SiteCollection
             $site = new Site();
             $site
                 ->setHostName($config['hostName'])
+                ->setUrl($config['url'])
                 ->setTitle($config['title'])
                 ->setTagline($config['tagline'])
                 ->setDescription($config['description'])

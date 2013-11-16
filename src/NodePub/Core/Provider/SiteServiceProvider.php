@@ -3,21 +3,20 @@
 namespace NodePub\Core\Provider;
 
 use Silex\Application;
+use Silex\ServiceProviderInterface;
 
-use NodePub\Core\Provider\BaseServiceProvider;
 use NodePub\Core\Controller\SiteController;
 use NodePub\Core\Model\SiteCollection;
+use NodePub\Core\Routing\SitesAdminRouting;
 use NodePub\Common\Yaml\YamlConfigurationProvider;
 
 /**
  * Provides multisite configuration
  */
-class SiteServiceProvider extends BaseServiceProvider
+class SiteServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
-    {
-        parent::register($app);
-        
+    {        
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['np.config_dir'].'/sites.yml';
@@ -42,56 +41,29 @@ class SiteServiceProvider extends BaseServiceProvider
 
             return $site;
         });
-    }
-    
-    public function registerAdmin(Application $app)
-    {
-        $app['np.sites.controller'] = $app->share(function($app) {
-            return new SiteController($app);
-        });
+        
+        if (isset($app['np.admin']) && true === $app['np.admin']) {
+            
+            $app['np.sites.controller'] = $app->share(function($app) {
+                return new SiteController($app);
+            });
+            
+            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
+                
+                $siteControllers = new SitesAdminRouting();
+                $siteControllers = $siteControllers->connect($app);
+                
+                $controllers->mount($app['np.sites.mount_point'], $siteControllers);
+                return $controllers;
+            }));
+        }
     }
 
     public function boot(Application $app)
     {
-        parent::boot($app);
-        
         $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
             $twig->addGlobal('site', $app['np.sites.active_site']);
             return $twig;
         }));
-    }
-    
-    public function bootAdmin(Application $app)
-    {
-        // Convert hostname into site object
-        $siteConverter = function($hostName) use($app) {
-            if (!$site = $app['np.sites.provider']->getByHostName($hostName)) {
-                throw new \Exception("Site not found", 404);
-            }
-
-            return $site;
-        };
-
-        # ===================================================== #
-        #    ROUTES                                             #
-        # ===================================================== #
-
-        $siteControllers = $app['controllers_factory'];
-
-        $siteControllers->get('/', 'np.sites.controller:sitesAction')
-            ->bind('admin_sites');
-
-        $siteControllers->match('/{site}/settings', 'np.sites.controller:settingsAction')
-            ->convert('site', $siteConverter)
-            ->bind('admin_site');
-
-        $siteControllers->post('/switch/{site}', 'np.sites.controller:switchSiteAction')
-            ->convert('site', $siteConverter)
-            ->bind('admin_sites_switch');
-
-        $app->mount(
-            $app['np.admin.route_prefix']->create($app['np.sites.mount_point']),
-            $siteControllers
-        );
     }
 }
