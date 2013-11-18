@@ -117,6 +117,14 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new ThemeServiceProvider(), array(
             'np.theme.active' => $app['np.sites.active_site']->getTheme()
         ));
+        
+        // register extensions - this will eventually be configurable from the UI
+        $app['np.extensions'] = $app->share($app->extend('np.extensions', function($extensions, $app) {
+            $extensions->register(new \NodePub\Core\Extension\CoreExtension($app));
+            $extensions->register(new \NodePub\Core\Extension\ThemeEngineExtension($app));
+            $extensions->register(new \NodePub\Core\Extension\BlogEngineExtension($app));
+            return $extensions;
+        }));
     }
 
     public function boot(Application $app)
