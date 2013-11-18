@@ -28,6 +28,11 @@ class AdminControllersServiceProvider implements ServiceProviderInterface
                     ? $app['np.app_config']['admin']['uri']
                     : ApplicationConfiguration::DEFAULT_ADMIN_URI;
             });
+            
+            // factory for creating mount points that have the same prefix prepended
+            $app['np.admin.controller.prefix_factory'] = $app->share(function($app) {
+                return new RoutePrefixFactory($app['np.admin.controllers.prefix']);
+            });
         }
     }
 

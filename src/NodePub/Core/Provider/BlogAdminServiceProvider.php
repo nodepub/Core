@@ -47,14 +47,10 @@ class BlogAdminServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
-        # ===================================================== #
-        #    BLOG ADMIN ROUTES                                  #
-        # ===================================================== #
-
-        // create an index shortcut
-        // $app->get(
-        //     $app['np.admin.route_prefix']->create($app['np.blog_admin.mount_point']),
-        //     'np.blog_admin.controller:dashboardAction'
-        // )->bind('admin_blog');
+        // Create an index shortcut
+        $app->get(
+            $app['np.admin.controller.prefix_factory']->create($app['np.blog_admin.mount_point']),
+            'np.blog_admin.controller:dashboardAction'
+        )->bind('admin_blog');
     }
 }
