@@ -29,7 +29,7 @@ class ThemeEngineExtension extends Extension
 
     public function getToolbarItems() {
         return array(
-            new ToolbarItem('Themes', 'admin_themes', 'eye-open')
+            new ToolbarItem('Themes', 'admin_themes', 'eye')
         );
     }
 
