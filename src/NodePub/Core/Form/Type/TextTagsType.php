@@ -14,7 +14,7 @@ class TextTagsType extends AbstractType
 {
     protected $tagDelimiter;
     
-    public function __construct($tagDelimiter)
+    public function __construct($tagDelimiter = ',')
     {
         $this->tagDelimiter = $tagDelimiter;
     }
