@@ -87,7 +87,7 @@ class AdminController
             }
         }
 
-        return new Response($this->app['twig']->render('@np-admin/dashboard.twig', array(
+        return new Response($this->app['twig']->render('@np-admin/panels/dashboard.twig', array(
             'dashboard_actions' => $actionMap
         )));
     }
@@ -95,7 +95,7 @@ class AdminController
     public function settingsAction()
     {
         sleep(3);
-        return new Response($this->app['twig']->render('@np-admin/settings.twig', array(
+        return new Response($this->app['twig']->render('@np-admin/panels/settings.twig', array(
             'settings' => $this->app['np.admin.toolbar']->getActiveItems()
         )));
     }
@@ -123,36 +123,17 @@ class AdminController
     
     public function sitemapAction(Request $request)
     {
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Sitemap',
-            'content' => 'TODO'
-        ));
-
-        // $nodes = $this->app['db.orm.em']
-        //     ->getRepository('NodePub\Model\Node')
-        //     ->findAll();
-        
-        // return new Response($this->app['twig']->render('@core/admin/sitemap.twig', array(
-        //     'nodes' => $nodes,
-        //     'node_types' => array(),
-        //     'components' => array()
-        // )));
+        return $this->app['twig']->render('@np-admin/panels/sitemap.twig');
     }
 
     public function usersAction()
     {
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Users',
-            'content' => 'TODO'
-        ));
+        return $this->app['twig']->render('@np-admin/panels/users.twig');
     }
 
     public function userAction()
     {
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Users > Foo',
-            'content' => 'TODO'
-        ));
+        return $this->app['twig']->render('@np-admin/panels/user.twig');
     }
 
     public function logAction()
@@ -164,7 +145,7 @@ class AdminController
         $logContents = file_get_contents($this->app['log_file']);
         $logContents = $logContents ? $logContents : 'Log could not be loaded.';
 
-        return new Response($this->app['twig']->render('@core/admin/log.twig', array(
+        return new Response($this->app['twig']->render('@np-admin/panels/log.twig', array(
             'log' => $logContents
         )));
     }
@@ -215,7 +196,7 @@ class AdminController
             return $b->count > $a->count ;
         });
 
-        return new Response($this->app['twig']->render('@core/admin/stats.twig', array(
+        return new Response($this->app['twig']->render(' @np-admin/panels/stats.twig', array(
             'events' => $events,
             'stats'  => $stats
         )));
@@ -271,10 +252,7 @@ class AdminController
 
     public function cacheAction()
     {
-        return $this->app['twig']->render('@np-admin/panel.twig', array(
-            'nav' => 'Cache',
-            'content' => 'TODO'
-        ));
+        return $this->app['twig']->render('@np-admin/panels/cache.twig');
     }
 
     public function postClearCacheAction($all)

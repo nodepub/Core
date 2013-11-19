@@ -20,7 +20,7 @@ class BlogAdminRouting implements ControllerProviderInterface
         $controllers = $app['controllers_factory'];
 
         $postProvider = function($id) use($app) {
-            if ($post = $app['blog.post_manager']->findById($id)
+            if ($post = $app['np.blog.post_manager']->findById($id)
                 //|| $post = $app['np.blog_admin.draft_manager']->findById($id)
                 ) {
                 return $post;

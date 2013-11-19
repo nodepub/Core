@@ -2,19 +2,19 @@
 
 namespace NodePub\Core\Provider;
 
+use Silex\Application;
+use Silex\ServiceProviderInterface;
+use Symfony\Component\EventDispatcher\Event;
+
 use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Controller\DebugController;
 use NodePub\Core\Routing\AdminRouting;
 use NodePub\Core\Routing\DebugRouting;
 use NodePub\Core\Provider\RoutePrefixFactory;
-
+use NodePub\Core\Twig\AdminTwigExtension;
 use NodePub\Core\Model\Toolbar;
 use NodePub\ThemeEngine\ThemeEvents;
 use NodePub\Install\InstallerManager;
-
-use Silex\Application;
-use Silex\ServiceProviderInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Service Provider that registers admin settings and dashboard objects
@@ -55,6 +55,13 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
                 
                 $controllers->mount('/debug', $debugControllers);
                 return $controllers;
+            }));
+        }
+        
+        if (isset($app['twig'])) {
+            $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
+                $twig->addExtension(new AdminTwigExtension());
+                return $twig;
             }));
         }
     }

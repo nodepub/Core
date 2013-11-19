@@ -29,7 +29,7 @@ class BlogAdminController
         $postLimit = $this->app['np.blog_admin.post_limit'];
         
         return new Response($this->app['twig']->render('@np-admin/panels/blog.twig', array(
-            'posts' => $this->app['blog.post_manager']->findRecentPosts($postLimit),
+            'posts' => $this->postManager->findRecentPosts($postLimit),
             'drafts' => array(), //$this->app['np.blog_admin.draft_manager']->findRecentPosts($postLimit),
             'form' => $this->getPostForm()->createView(),
             'page_number' => 1,

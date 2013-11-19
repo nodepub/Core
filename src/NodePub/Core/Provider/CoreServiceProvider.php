@@ -10,7 +10,7 @@ use NodePub\Core\Bootstraper;
 use NodePub\Core\Config\ApplicationConfiguration;
 use NodePub\Core\Event\ThemeActivateListener;
 use NodePub\ThemeEngine\ThemeEvents;
-use NodePub\Core\Form\Type\TextTagsType;
+//use NodePub\Core\Form\Type\TextTagsType;
 use NodePub\Core\Provider\AdminDashboardServiceProvider;
 use NodePub\Core\Provider\AdminRoutesServiceProvider;
 use NodePub\Core\Provider\ExtensionServiceProvider;
@@ -89,10 +89,10 @@ class CoreServiceProvider implements ServiceProviderInterface
         ));
     
         // Register custom form types
-        $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
-            $extensions[] = new TextTagsType();
-            return $extensions;
-        }));
+        // $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
+        //     $extensions[] = new TextTagsType();
+        //     return $extensions;
+        // }));
         $app->register(new \Silex\Provider\TranslationServiceProvider(), array(
             'locale_fallback' => 'en',
         ));
