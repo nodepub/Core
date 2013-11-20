@@ -62,8 +62,9 @@ class BlogAdminController
 
     public function newPostAction()
     {
-        return new Response($this->app['twig']->render('@np-admin/panels/blog_post_new.twig', array(
-            'form' => $this->getPostForm()->createView()
+        return new Response($this->app['twig']->render('@np-admin/panels/blog_post_edit.twig', array(
+            'form'  => $this->getPostForm()->createView(),
+            'draft' => true
         )));
     }
 
@@ -88,8 +89,9 @@ class BlogAdminController
     public function editPostAction(Post $post)
     {
         return new Response($this->app['twig']->render('@np-admin/panels/blog_post_edit.twig', array(
-            'post' => $post,
-            'form' => $this->getPostForm($post)->createView()
+            'post'  => $post,
+            'form'  => $this->getPostForm($post)->createView(),
+            'draft' => false
         )));
     }
 
@@ -107,6 +109,15 @@ class BlogAdminController
     }
 
     public function deletePostAction(Post $post)
+    {
+    }
+    
+    public function editSettingsAction()
+    {
+        return new Response($this->app['twig']->render('@np-admin/panels/blog_settings.twig'));
+    }
+    
+    public function updateSettingsAction(Request $request)
     {
     }
 

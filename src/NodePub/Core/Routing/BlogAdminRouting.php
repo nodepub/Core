@@ -36,13 +36,19 @@ class BlogAdminRouting implements ControllerProviderInterface
             ->value('page', 1)
             ->assert('page', "\d")
             ->bind('admin_blog_posts');
-
-        $controllers->get('/{post}', 'np.blog_admin.controller:getPostAction')
-            ->convert('post', $postProvider)
-            ->bind('admin_blog_post');
+        
+        $controllers->get('/settings', 'np.blog_admin.controller:editSettingsAction')
+            ->bind('admin_blog_settings');
+        
+        $controllers->post('/settings/update', 'np.blog_admin.controller:updateSettingsAction')
+            ->bind('admin_blog_update_settings');
 
         $controllers->get('/new', 'np.blog_admin.controller:newPostAction')
             ->bind('admin_blog_new_post');
+        
+        $controllers->get('/{post}', 'np.blog_admin.controller:getPostAction')
+            ->convert('post', $postProvider)
+            ->bind('admin_blog_post');
 
         $controllers->get('/{post}/edit', 'np.blog_admin.controller:editPostAction')
             ->convert('post', $postProvider)
