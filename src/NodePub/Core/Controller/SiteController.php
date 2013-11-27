@@ -2,8 +2,12 @@
 
 namespace NodePub\Core\Controller;
 
-use NodePub\Core\Model\Site;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use NodePub\Core\Model\Site;
+use NodePub\Core\Form\Type\SiteType;
 
 class SiteController
 {
@@ -20,15 +24,62 @@ class SiteController
             'sites' =>  $this->app['np.sites.provider']->getAll()
         ));
     }
-
-    public function settingsAction(Site $site)
+    
+    public function postSitesAction(Request $request)
     {
-        return $this->app['twig']->render('@np-admin/panels/site.twig', array(
-            'site' => $site
+        $this->getSiteForm()->bindRequest($request);
+
+        if ($form->isValid()) {
+            
+            // TODO save
+            
+            return $this->app->redirect($this->app['url_generator']->generate('admin_sites'));
+        } else {
+            # forward to template for errors
+            return $this->app['twig']->render('@np-admin/panels/site_settings.twig', array(
+                'form' => $form->createView()
+            ));
+        }
+    }
+    
+    public function newSiteAction()
+    {
+        return $this->app['twig']->render('@np-admin/panels/site_settings.twig', array(
+            'form' => $this->getSiteForm()->createView()
+        ));
+    }
+
+    public function settingsAction(Request $request, Site $site)
+    {
+        $form = $this->getSiteForm($site);
+        
+        if (false) {
+            $form->bindRequest($request);
+    
+            if ($form->isValid()) {
+                
+                // TODO save
+                
+                return $this->app->redirect($this->app['url_generator']->generate('admin_sites'));
+            }
+        }
+        
+        return $this->app['twig']->render('@np-admin/panels/site_settings.twig', array(
+            'siteSettings' => $site,
+            'form' => $form->createView()
         ));
     }
 
     public function switchSiteAction(Site $site)
     {
+    }
+
+    protected function getSiteForm($site = null) {
+        $site = $site?: new Site();
+        $form = $this->app['form.factory']
+            ->createBuilder(new SiteType(), $site)
+            ->getForm();
+
+        return $form;
     }
 }

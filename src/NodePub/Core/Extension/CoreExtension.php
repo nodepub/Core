@@ -26,7 +26,6 @@ class CoreExtension extends Extension
 
     public function getToolbarItems() {
         return array(
-            new ToolbarItem('Dashboard', 'admin_dashboard', 'dashboard'),
             new ToolbarItem('Sites', 'admin_sites', 'asterisk'),
             new ToolbarItem('Pages', 'admin_sitemap', 'sitemap'),
             new ToolbarItem('Users', 'admin_users', 'user'),

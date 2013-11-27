@@ -3,6 +3,7 @@
 namespace NodePub\Core\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use NodePub\Navigation\Sitemap;
 
 /**
  * @Entity
@@ -54,6 +55,11 @@ class Site
      * @Column(name="updated_at", type="datetime", nullable=false)
      */
     private $updatedAt;
+    
+    /**
+     * @var NodePub\Navigation\Sitemap
+     */
+    protected $sitemap;
 
     /**
      * @var ArrayCollection
@@ -184,6 +190,18 @@ class Site
     public function getTheme()
     {
         return $this->theme;
+    }
+    
+    public function setSitemap(Sitemap $sitemap)
+    {
+        $this->sitemap = $sitemap;
+      
+        return $this;
+    }
+    
+    public function getSitemap()
+    {
+        return $this->sitemap;
     }
     
     /**

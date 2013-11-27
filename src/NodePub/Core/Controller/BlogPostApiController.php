@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\BlogBundle\Controller;
+namespace NodePub\Core\Controller;
 
 use NodePub\BlogEngine\Post;
 use NodePub\BlogBundle\Form\Type\PostType;

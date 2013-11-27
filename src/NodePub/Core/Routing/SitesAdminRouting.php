@@ -22,6 +22,12 @@ class SitesAdminRouting implements ControllerProviderInterface
 
         $controllers->get('/', 'np.sites.controller:sitesAction')
             ->bind('admin_sites');
+        
+        $controllers->post('/', 'np.sites.controller:postSitesAction')
+            ->bind('admin_sites_post');
+        
+        $controllers->get('/new', 'np.sites.controller:newSiteAction')
+            ->bind('admin_sites_new_site');
 
         $controllers->match('/{site}/settings', 'np.sites.controller:settingsAction')
             ->convert('site', $siteConverter)

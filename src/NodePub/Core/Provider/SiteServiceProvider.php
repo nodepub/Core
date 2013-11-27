@@ -32,6 +32,10 @@ class SiteServiceProvider implements ServiceProviderInterface
         $app['np.sites'] = $app->share(function($app) {
             return $app['np.sites.provider']->getAll();
         });
+        
+        $app['np.multisite'] = $app->share(function($app) {
+            return (count($app['np.sites']) > 1);
+        });
 
         $app['np.sites.active_site'] = $app->share(function($app) {
 

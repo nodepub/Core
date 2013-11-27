@@ -10,7 +10,7 @@ use NodePub\Core\Bootstraper;
 use NodePub\Core\Config\ApplicationConfiguration;
 use NodePub\Core\Event\ThemeActivateListener;
 use NodePub\ThemeEngine\ThemeEvents;
-//use NodePub\Core\Form\Type\TextTagsType;
+
 use NodePub\Core\Provider\AdminDashboardServiceProvider;
 use NodePub\Core\Provider\AdminRoutesServiceProvider;
 use NodePub\Core\Provider\ExtensionServiceProvider;
@@ -84,15 +84,10 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new \Silex\Provider\ServiceControllerServiceProvider());
         $app->register(new \Silex\Provider\SessionServiceProvider());
         $app->register(new \Silex\Provider\FormServiceProvider(), array(
-            // make sure that each site gets a different hash
+            // ensure that each site gets a different hash
             'form.secret' => md5($app['np.host_name'] . $app['np.app_config']['form']['secret'])
         ));
-    
-        // Register custom form types
-        // $app['form.type.extensions'] = $app->share($app->extend('form.type.extensions', function ($extensions) use ($app) {
-        //     $extensions[] = new TextTagsType();
-        //     return $extensions;
-        // }));
+
         $app->register(new \Silex\Provider\TranslationServiceProvider(), array(
             'locale_fallback' => 'en',
         ));
@@ -114,6 +109,12 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
+        
+        // These should be optional
+        $app->register(new \NodePub\Cms\Provider\CmsServiceProvider());
+        $app->register(new \NodePub\Cms\Provider\SitemapServiceProvider());
+        $app->register(new \NodePub\Cms\Provider\DoctrineBootstrapServiceProvider());
+        
         $app->register(new ThemeServiceProvider(), array(
             'np.theme.active' => $app['np.sites.active_site']->getTheme()
         ));

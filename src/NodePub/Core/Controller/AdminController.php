@@ -5,7 +5,6 @@ namespace NodePub\Core\Controller;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class AdminController
 {
@@ -21,12 +20,12 @@ class AdminController
      */
     public function indexAction()
     {
-        return $this->app->redirect($this->app['url_generator']->generate('admin_dashboard'));
+        return $this->app->redirect($this->app['url_generator']->generate('admin_toolbar'));
     }
 
     public function installAction(Request $request, $step = 1)
     {
-        // check if already installed
+        // TODO check if already installed
         
         if (isset($this->app['np.installer'])) {
             try {
@@ -50,51 +49,8 @@ class AdminController
         )));
     }
 
-    public function dashboardAction()
-    {
-        $actionMap = array(
-            array(
-                'Sites' => array(
-                    array('name' => 'Sites', 'route' => 'admin_sites')),
-                'Content' => array(
-                    array('name' => 'Sitemap', 'route' => 'admin_sitemap'),
-                    array('name' => 'Node Types', 'route' => 'admin_node_types')),
-                'Design' => array(
-                    array('name' => 'Themes', 'route' => 'admin_themes'),
-                    array('name' => 'Templates', 'route' => 'admin_templates'))
-            ),
-            array(
-                'Components' => array(
-                    array('name' => 'Blocks', 'route' => 'admin_blocks'),
-                    array('name' => 'Extensions', 'route' => 'admin_extensions')),
-                'Reports' => array(
-                    array('name' => 'Statistics', 'route' => 'admin_stats'),
-                    array('name' => 'Logs', 'route' => 'admin_logs'))
-            )
-        );
-
-        // Remove inactive actions if no admin route exists
-        foreach ($actionMap as $sectionKey => $section) {
-            foreach ($section as $header => $actions) {
-                foreach ($actions as $actionKey => $action) {
-                    try {
-                        $url = $this->app['url_generator']->generate($action['route']);
-                        $actionMap[$sectionKey][$header][$actionKey]['url'] = $url;
-                    } catch (RouteNotFoundException $e) {
-                        unset($actionMap[$sectionKey][$header][$actionKey]);
-                    }
-                }
-            }
-        }
-
-        return new Response($this->app['twig']->render('@np-admin/panels/dashboard.twig', array(
-            'dashboard_actions' => $actionMap
-        )));
-    }
-
     public function settingsAction()
     {
-        sleep(3);
         return new Response($this->app['twig']->render('@np-admin/panels/settings.twig', array(
             'settings' => $this->app['np.admin.toolbar']->getActiveItems()
         )));
@@ -121,13 +77,26 @@ class AdminController
         return $response;
     }
     
-    public function sitemapAction(Request $request)
+    public function sitemapAction()
     {
-        return $this->app['twig']->render('@np-admin/panels/sitemap.twig');
+        return $this->app['twig']->render('@np-admin/panels/sitemap.twig',
+            array(
+                'sitemap' => $this->app['np.sitemap']->getTree(),
+                'node_types' => $this->app['np.node_types']
+            )
+        );
+    }
+    
+    public function sitemapUpdateAction(Request $request)
+    {
+        return $this->app['twig']->render('@np-admin/panels/sitemap.twig',
+            array('sitemap' => $this->app['np.sitemap']->getTree())
+        );
     }
 
     public function usersAction()
     {
+        sleep(2);
         return $this->app['twig']->render('@np-admin/panels/users.twig');
     }
 
@@ -276,13 +245,5 @@ class AdminController
         }
 
         return $this->app->json(array('success' => true));
-    }
-    
-    /**
-     * Checks if request is ajax or expecting json returned
-     */
-    protected function isApiRequest(Request $request)
-    {
-        return ($request->isXmlHttpRequest() || $request->getRequestFormat() == 'json');
     }
 }

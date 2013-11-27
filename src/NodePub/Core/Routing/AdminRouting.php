@@ -20,9 +20,6 @@ class AdminRouting implements ControllerProviderInterface
         $controllers->get('/toolbar', 'np.admin.controller:toolbarAction')
             ->bind('admin_toolbar');
 
-        $controllers->get('/dashboard', 'np.admin.controller:dashboardAction')
-            ->bind('admin_dashboard');
-
         $controllers->get('/settings', 'np.admin.controller:settingsAction')
             ->bind('admin_settings');
 
