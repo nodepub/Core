@@ -16,13 +16,13 @@ class Toolbar
         $this->items = array();
     }
 
-    function addItem(ToolbarItem $item)
+    public function addItem(ToolbarItem $item)
     {
         $this->items[]= $item;
         return $this;
     }
 
-    function addItems(array $items)
+    public function addItems(array $items)
     {
         foreach ($items as $item) {
             $this->addItem($item);
@@ -35,8 +35,16 @@ class Toolbar
      * Returns array of active toolbar items
      * @return array
      */
-    function getActiveItems()
+    public function getActiveItems()
     {
         return $this->items;
+    }
+    
+    /**
+     * Returns array of active toolbar item groups
+     */
+    public function getGroupedActiveItems($groupSize = 5)
+    {
+        return array_chunk($this->items, $groupSize);
     }
 }

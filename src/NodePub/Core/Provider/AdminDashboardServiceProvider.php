@@ -34,6 +34,9 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         $app['np.admin.toolbar'] = $app->share(function() {
             return new Toolbar();
         });
+        
+        // number of toolbar icons per group
+        $app['np.admin.toolbar.group_size'] = 5;
 
         $app['np.admin.controller'] = $app->share(function($app) {
             return new AdminController($app);

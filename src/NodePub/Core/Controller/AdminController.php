@@ -42,9 +42,10 @@ class AdminController
     public function toolbarAction()
     {
         //$token = $this->app['security']->getToken();
+
         return new Response($this->app['twig']->render('@np-admin/_toolbar.twig', array(
             'username' => 'Andrew', //$token->getUser()->getUsername(),
-            'toolbar' => $this->app['np.admin.toolbar']->getActiveItems(),
+            'toolbar' => $this->app['np.admin.toolbar']->getGroupedActiveItems($this->app['np.admin.toolbar.group_size']),
             'js_modules' => array()
         )));
     }
