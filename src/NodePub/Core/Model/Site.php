@@ -3,7 +3,6 @@
 namespace NodePub\Core\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use NodePub\Navigation\Sitemap;
 
 /**
  * @Entity
@@ -56,10 +55,6 @@ class Site
      */
     private $updatedAt;
     
-    /**
-     * @var NodePub\Navigation\Sitemap
-     */
-    protected $sitemap;
 
     /**
      * @var ArrayCollection
@@ -76,17 +71,11 @@ class Site
     #    Getters/Setters                                    #
     # ===================================================== #
 
-    /**
-     * @return integer
-     */
     public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * @param string $hostName
-     */
     public function setHostName($hostName)
     {   
         $this->hostName = $hostName;
@@ -94,17 +83,11 @@ class Site
         return $this;
     }
 
-    /**
-     * @return string 
-     */
     public function getHostName()
     {
         return $this->hostName;
     }
     
-    /**
-     * @param string $hostName
-     */
     public function setUrl($url)
     {   
         $this->url = $url;
@@ -112,17 +95,11 @@ class Site
         return $this;
     }
 
-    /**
-     * @return string 
-     */
     public function getUrl()
     {
         return $this->url;
     }
     
-    /**
-     * @param string $title
-     */
     public function setTitle($title)
     {   
         $this->title = $title;
@@ -130,17 +107,11 @@ class Site
         return $this;
     }
 
-    /**
-     * @return string 
-     */
     public function getTitle()
     {
         return $this->title;
     }
     
-    /**
-     * @param string $tagline
-     */
     public function setTagline($tagline)
     {   
         $this->tagline = $tagline;
@@ -148,17 +119,11 @@ class Site
         return $this;
     }
 
-    /**
-     * @return string 
-     */
     public function getTagline()
     {
         return $this->tagline;
     }
     
-    /**
-     * @param string $description
-     */
     public function setDescription($description)
     {   
         $this->description = $description;
@@ -166,9 +131,6 @@ class Site
         return $this;
     }
 
-    /**
-     * @return string 
-     */
     public function getDescription()
     {
         return $this->description;
@@ -192,17 +154,8 @@ class Site
         return $this->theme;
     }
     
-    public function setSitemap(Sitemap $sitemap)
-    {
-        $this->sitemap = $sitemap;
-      
-        return $this;
-    }
     
-    public function getSitemap()
-    {
-        return $this->sitemap;
-    }
+    
     
     /**
      * @return mixed
