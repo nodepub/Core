@@ -19,6 +19,8 @@ class SitesAdminRouting implements ControllerProviderInterface
         };
 
         $controllers = $app['controllers_factory'];
+        
+        //$controllers->secure('ROLE_ADMIN');
 
         $controllers->get('/', 'np.sites.controller:sitesAction')
             ->bind('admin_sites');

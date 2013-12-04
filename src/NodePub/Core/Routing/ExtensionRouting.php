@@ -9,8 +9,6 @@ class ExtensionRouting implements ControllerProviderInterface
 {
     public function connect(Application $app)
     {
-        $controllers = $app['controllers_factory'];
-
         $extensionFinder = function($name) use($app) {
             if ($extension = $app['np.extensions']->getExtension($name)) {
                 return $extension;
@@ -18,6 +16,8 @@ class ExtensionRouting implements ControllerProviderInterface
                 throw new \Exception("Extension not found", 404);
             }
         };
+        
+        $controllers = $app['controllers_factory'];
 
         $controllers->get('/', 'np.extensions.controller:getExtensionsAction')
             ->bind('admin_extensions');

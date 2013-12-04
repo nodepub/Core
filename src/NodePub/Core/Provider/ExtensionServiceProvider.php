@@ -18,33 +18,32 @@ class ExtensionServiceProvider implements ServiceProviderInterface
     {
         $app['np.extensions'] = $app->share(function($app) {
             return new ExtensionContainer(array(
-                'admin' => $app['np.admin'],
                 'toolbar' => $app['np.admin.toolbar']
             ));
         });
         
-        if (isset($app['np.admin']) && true === $app['np.admin']) {
-            
-            $app['np.extensions.mount_point'] = '/extensions';
+        $app['np.extensions.mount_point'] = '/extensions';
 
-            $app['np.extensions.controller'] = $app->share(function($app) {
-                return new ExtensionController($app, $app['np.extensions']);
-            });
+        $app['np.extensions.controller'] = $app->share(function($app) {
+            return new ExtensionController($app, $app['np.extensions']);
+        });
+        
+        $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($adminControllers, $app) {
+            $extensionControllers = new ExtensionRouting();
+            $extensionControllers = $extensionControllers->connect($app);
+            $adminControllers->mount($app['np.extensions.mount_point'], $extensionControllers);
             
-            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
-                
-                $extensionControllers = new ExtensionRouting();
-                $extensionControllers = $extensionControllers->connect($app);
-                
-                $controllers->mount($app['np.extensions.mount_point'], $extensionControllers);
-                return $controllers;
-            }));
-        }
+            return $adminControllers;
+        }));
     }
 
     public function boot(Application $app)
     {
-        $app['np.extensions']->boot();
+        $app->before(function() use ($app) {
+            $app['np.extensions']['debug'] = $app['debug'];
+            $app['np.extensions']['admin'] = $app['np.admin'];
+            $app['np.extensions']->boot();
+        });
 
         $app->after(function(Request $request, Response $response) use ($app) {
 

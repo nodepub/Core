@@ -17,11 +17,11 @@
         "symfony/locale"      : "~2.3",
         "symfony/validator"   : "~2.3",
         "symfony/yaml"        : "~2.3",
-        "monolog/monolog"     : ">=1.0.0",
         "cocur/slugify"       : "dev-master",
         "dflydev/markdown"    : "1.0.*",
         "nodepub/navigation"  : "*",
-        "nodepub/theme-engine": "*"
+        "nodepub/theme-engine": "*",
+        "nodepub/monolog-json-service-provider": "*"
     },
     "autoload": {
         "psr-0": { "NodePub\\Core": "src/" }

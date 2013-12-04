@@ -14,13 +14,13 @@ class AdminController
     {
         $this->app = $app;
     }
-
-    /**
-     * Index - redirects to dashboard
-     */
-    public function indexAction()
+    
+    public function loginAction(Request $request)
     {
-        return $this->app->redirect($this->app['url_generator']->generate('admin_toolbar'));
+        return $this->app['twig']->render('@np-admin/login.twig', array(
+            'error'         => $this->app['security.last_error']($request),
+            'last_username' => $this->app['session']->get('_security.last_username'),
+        ));
     }
 
     public function installAction(Request $request, $step = 1)
@@ -41,13 +41,19 @@ class AdminController
 
     public function toolbarAction()
     {
-        //$token = $this->app['security']->getToken();
+        $token = $this->app['security']->getToken();
+        
+        if (null !== $token && $this->app['security']->isGranted('ROLE_ADMIN')) {
+            $user = $token->getUser();
+        } else {
+            return '';
+        }
 
-        return new Response($this->app['twig']->render('@np-admin/_toolbar.twig', array(
-            'username' => 'Andrew', //$token->getUser()->getUsername(),
+        return $this->app['twig']->render('@np-admin/_toolbar.twig', array(
+            'username' => 'Andrew', //$user->getUsername(),
             'toolbar' => $this->app['np.admin.toolbar']->getGroupedActiveItems($this->app['np.admin.toolbar.group_size']),
             'js_modules' => array()
-        )));
+        ));
     }
 
     public function settingsAction()

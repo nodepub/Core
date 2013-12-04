@@ -32,17 +32,14 @@ class BlogAdminServiceProvider implements ServiceProviderInterface
         $app['np.blog_admin.draft_controller'] = $app->share(function($app) {
             return new BlogAdminController($app, $app['np.blog_admin.draft_manager'] );
         });
-        
-        if (isset($app['np.admin']) && true === $app['np.admin']) {
-            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
-                
-                $blogControllers = new BlogAdminRouting();
-                $blogControllers = $blogControllers->connect($app);
-                
-                $controllers->mount($app['np.blog_admin.mount_point'], $blogControllers);
-                return $controllers;
-            }));
-        }
+
+        $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($adminControllers, $app) {
+            $blogControllers = new BlogAdminRouting();
+            $blogControllers = $blogControllers->connect($app);
+            $adminControllers->mount($app['np.blog_admin.mount_point'], $blogControllers);
+            
+            return $adminControllers;
+        }));
     }
 
     public function boot(Application $app)

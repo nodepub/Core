@@ -9,6 +9,7 @@ use Symfony\Component\EventDispatcher\Event;
 use NodePub\Core\Controller\AdminController;
 use NodePub\Core\Controller\DebugController;
 use NodePub\Core\Routing\AdminRouting;
+use NodePub\Core\Routing\AuthRouting;
 use NodePub\Core\Routing\DebugRouting;
 use NodePub\Core\Provider\RoutePrefixFactory;
 use NodePub\Core\Twig\AdminTwigExtension;
@@ -50,7 +51,7 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
             return new InstallerManager($app);
         });
         
-        if ($app['debug'] && isset($app['np.admin']) && true === $app['np.admin']) {
+        if ($app['debug']) {
             $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
                 
                 $debugControllers = new DebugRouting();
@@ -71,18 +72,16 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
-        if (false === $app['np.admin']) {
-            return;
-        }
+        // Because they're at the root admin prefix we mount them directly instead to  $app['np.admin.controllers']
+        $app->mount($app['np.admin.controllers.prefix'], new AuthRouting());
+        $app->mount($app['np.admin.controllers.prefix'], new AdminRouting());
 
         $app->before(function() use ($app) {
-
             $app['np.admin.theme'] = $app->share(function($app) {
                 if (isset($app['np.theme.manager'])) {
                     $app['np.theme.manager']->get($app['np.admin.theme']);
                 }
             });
-
         });
 
         // $app->on(ThemeEvents::THEME_MANAGER_INITIALIZED, function(Event $event) use ($app) {
@@ -108,8 +107,5 @@ class AdminDashboardServiceProvider implements ServiceProviderInterface
         //         }
         //     });
         // });
-        
-        // Because it's at the root admin prefix we mount it directly instead of adding it to the admin controllers
-        $app->mount($app['np.admin.controllers.prefix'], new AdminRouting());
     }
 }

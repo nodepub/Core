@@ -11,8 +11,6 @@ class AdminRouting implements ControllerProviderInterface
     {
         $controllers = $app['controllers_factory'];
 
-        $controllers->get('/', 'np.admin.controller:indexAction');
-
         // TODO this should be added dynamically only if not installed yet
         $controllers->get('/install', 'np.admin.controller:installAction')
             ->bind('admin_install');

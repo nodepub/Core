@@ -17,8 +17,6 @@ class BlogAdminRouting implements ControllerProviderInterface
 {
     public function connect(Application $app)
     {
-        $controllers = $app['controllers_factory'];
-
         $postProvider = function($id) use($app) {
             if ($post = $app['np.blog.post_manager']->findById($id)
                 //|| $post = $app['np.blog_admin.draft_manager']->findById($id)
@@ -28,6 +26,10 @@ class BlogAdminRouting implements ControllerProviderInterface
                 throw new \Exception("Post not found", 404);
             }
         };
+        
+        $controllers = $app['controllers_factory'];
+        
+        //$controllers->secure('ROLE_ADMIN');
 
         $controllers->post('/', 'np.blog_admin.controller:createPostAction')
             ->bind('admin_blog_post_posts');

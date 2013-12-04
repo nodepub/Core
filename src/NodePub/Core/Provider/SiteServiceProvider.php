@@ -20,6 +20,7 @@ class SiteServiceProvider implements ServiceProviderInterface
         $app['np.sites.debug'] = false;
         $app['np.sites.mount_point'] = '/sites';
         $app['np.sites.config_file'] = $app['np.config_dir'].'/sites.yml';
+        $app['np.site.class'] = '\NodePub\Core\Model\Site';
 
         // Loading from a yaml file for now, would like to be able to keep yaml site configuration
         // or have it all in the db for editing, which will override np.site.provider with a db entity manager
@@ -46,21 +47,18 @@ class SiteServiceProvider implements ServiceProviderInterface
             return $site;
         });
         
-        if (isset($app['np.admin']) && true === $app['np.admin']) {
+
+        $app['np.sites.controller'] = $app->share(function($app) {
+            return new SiteController($app);
+        });
+        
+        $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($adminControllers, $app) {
+            $siteControllers = new SitesAdminRouting();
+            $siteControllers = $siteControllers->connect($app);
+            $adminControllers->mount($app['np.sites.mount_point'], $siteControllers);
             
-            $app['np.sites.controller'] = $app->share(function($app) {
-                return new SiteController($app);
-            });
-            
-            $app['np.admin.controllers'] = $app->share($app->extend('np.admin.controllers', function($controllers, $app) {
-                
-                $siteControllers = new SitesAdminRouting();
-                $siteControllers = $siteControllers->connect($app);
-                
-                $controllers->mount($app['np.sites.mount_point'], $siteControllers);
-                return $controllers;
-            }));
-        }
+            return $adminControllers;
+        }));
     }
 
     public function boot(Application $app)

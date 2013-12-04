@@ -69,20 +69,16 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
         
-        // display admin controlls
-        $app['np.admin'] = $app->share(function($app) {
-            return true; //(isset($app['security']) && true === $app['security']->isGranted('ROLE_ADMIN'));
-        });
-        
         $this->bootstrapSilex($app);
         $this->bootstrapNodePub($app);
+        $this->bootstrapSecurity($app);
     }
     
-    public function bootstrapSilex(Application $app)
+    protected function bootstrapSilex(Application $app)
     {
         $app->register(new \Silex\Provider\UrlGeneratorServiceProvider());
         $app->register(new \Silex\Provider\ServiceControllerServiceProvider());
-        $app->register(new \Silex\Provider\SessionServiceProvider());
+        
         $app->register(new \Silex\Provider\FormServiceProvider(), array(
             // ensure that each site gets a different hash
             'form.secret' => md5($app['np.host_name'] . $app['np.app_config']['form']['secret'])
@@ -103,17 +99,19 @@ class CoreServiceProvider implements ServiceProviderInterface
         ));
     }
     
-    public function bootstrapNodePub(Application $app)
+    protected function bootstrapNodePub(Application $app)
     {
         $app->register(new AdminControllersServiceProvider());
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
         
-        // These should be optional
-        $app->register(new \NodePub\Cms\Provider\CmsServiceProvider());
-        $app->register(new \NodePub\Cms\Provider\SitemapServiceProvider());
-        $app->register(new \NodePub\Cms\Provider\DoctrineBootstrapServiceProvider());
+        // These are optional, only loaded if nodepub/cms library is present
+        if (class_exists('\\NodePub\\Cms\\Provider\\CmsServiceProvider')) {
+            $app->register(new \NodePub\Cms\Provider\CmsServiceProvider());
+            $app->register(new \NodePub\Cms\Provider\SitemapServiceProvider());
+            $app->register(new \NodePub\Cms\Provider\DoctrineBootstrapServiceProvider());
+        }
         
         $app->register(new ThemeServiceProvider(), array(
             'np.theme.active' => $app['np.sites.active_site']->getTheme()
@@ -126,6 +124,45 @@ class CoreServiceProvider implements ServiceProviderInterface
             $extensions->register(new \NodePub\Core\Extension\BlogEngineExtension($app));
             return $extensions;
         }));
+    }
+    
+    /**
+     * Registers SecurityServiceProvider, but has to be done after NodePub bootstraping
+     * in order to use dynamic admin prefix
+     */
+    protected function bootstrapSecurity(Application $app)
+    {
+        $app->register(new \Silex\Provider\SessionServiceProvider());
+        
+        $app->register(new \Silex\Provider\SecurityServiceProvider(), array(
+            
+            'security.firewalls' => array(
+                'np' => array(
+                    'pattern' => '^.*$',
+                    'anonymous' => true,
+                    'form' => array(
+                        'login_path' => $app['np.admin.controllers.prefix'],
+                        'check_path' => $app['np.admin.controller.prefix_factory']->create('/authenticate'),
+                        'default_target_path' => $app['np.admin.controller.prefix_factory']->create('/debug'),
+                    ),
+                    'logout' => array('logout_path' => $app['np.admin.controller.prefix_factory']->create('/logout')),
+                    'users' => array(
+                        // raw password is foo
+                        'andrew' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
+                    ),
+                ),
+                
+                // 'api' => array(
+                //     'pattern' => '^/api/',
+                //     'security' => $app['debug'] ? false : true,
+                //     'wsse' => true,
+                // )
+            ),
+            
+            'security.access_rules' => array(
+                array('^'.$app['np.admin.controllers.prefix'].'/', 'ROLE_ADMIN'),
+            )
+        ));
     }
 
     public function boot(Application $app)
