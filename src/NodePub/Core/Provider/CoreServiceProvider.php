@@ -19,6 +19,7 @@ use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
 
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -69,6 +70,14 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
         
+        // Define as simple array, CMS lib replaces it with db backed service
+        $app['np.user_provider'] = $app->share(function($app) {
+            return array(
+                // raw password is foo
+                'andrew' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
+            );
+        });
+        
         $this->bootstrapSilex($app);
         $this->bootstrapNodePub($app);
         $this->bootstrapSecurity($app);
@@ -105,6 +114,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->register(new AdminDashboardServiceProvider());
         $app->register(new ExtensionServiceProvider());
         $app->register(new SiteServiceProvider());
+        $app->register(new TextHelperServiceProvider());
         
         // These are optional, only loaded if nodepub/cms library is present
         if (class_exists('\\NodePub\\Cms\\Provider\\CmsServiceProvider')) {
@@ -132,6 +142,8 @@ class CoreServiceProvider implements ServiceProviderInterface
      */
     protected function bootstrapSecurity(Application $app)
     {
+        $app['np.bcrypt.cost'] = 15;
+        
         $app->register(new \Silex\Provider\SessionServiceProvider());
         
         $app->register(new \Silex\Provider\SecurityServiceProvider(), array(
@@ -146,10 +158,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                         'default_target_path' => $app['np.admin.controller.prefix_factory']->create('/debug'),
                     ),
                     'logout' => array('logout_path' => $app['np.admin.controller.prefix_factory']->create('/logout')),
-                    'users' => array(
-                        // raw password is foo
-                        'andrew' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
-                    ),
+                    'users' => $app['np.user_provider']
                 ),
                 
                 // 'api' => array(
@@ -161,7 +170,11 @@ class CoreServiceProvider implements ServiceProviderInterface
             
             'security.access_rules' => array(
                 array('^'.$app['np.admin.controllers.prefix'].'/', 'ROLE_ADMIN'),
-            )
+            ),
+            
+            'encoder.digest' => $app->share(function($app) {
+                return new BCryptPasswordEncoder($app['np.bcrypt.cost']);
+            }),
         ));
     }
 
