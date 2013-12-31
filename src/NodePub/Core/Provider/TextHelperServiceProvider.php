@@ -19,11 +19,10 @@ class TextHelperServiceProvider implements ServiceProviderInterface
         
         $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
             
-            $slugifyFunction =  new \Twig_SimpleFunction('slugify', function($arg) {
-                $slugify = new Slugify();
-                return $slugify->slugify($arg);
+            $slugifyFilter =  new \Twig_SimpleFilter('slugify', function($string) use ($app) {
+                return $app['np.slugify']->slugify($string);
             });
-            $twig->addFunction($slugifyFunction);
+            $twig->addFilter($slugifyFilter);
             
             return $twig;
         }));
