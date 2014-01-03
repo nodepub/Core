@@ -24,7 +24,12 @@ class Toolbar
 
     public function addItems(array $items)
     {
-        foreach ($items as $item) {
+        foreach ($items as $key => $item) {
+            if (is_array($item)) {
+                $item['name'] = $key;
+                $item = ToolbarItem::factory($item);
+            }
+            
             $this->addItem($item);
         }
 

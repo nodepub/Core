@@ -1,6 +1,6 @@
 <?php
 
-namespace NodePub\Core\Extension;
+namespace NodePub\Core\Extensions\ThemeEngineExtension;
 
 use NodePub\Core\Extension\Extension;
 use NodePub\Core\Model\ToolbarItem;
@@ -10,29 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ThemeEngineExtension extends Extension
 {
-    public function getName() {
-        return 'NodePub Theme';
-    }
-
-    public function getResourceDirectory() {
-        return '';
-    }
-
-    public function getResourceManifest() {
-        return array(
-            '/css/spectrum.css',
-            '/js/lib/spectrum.js',
-            '/js/np/themeEngine.js',
-            '/js/np/colorPicker.js'
-        );
-    }
-
-    public function getToolbarItems() {
-        return array(
-            new ToolbarItem('Themes', 'admin_themes', 'eye')
-        );
-    }
-
     /**
      * If theme_preview is in the session, adds the theme switcher form.
      */

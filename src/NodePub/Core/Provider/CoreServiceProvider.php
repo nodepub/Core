@@ -129,9 +129,9 @@ class CoreServiceProvider implements ServiceProviderInterface
         
         // register extensions - this will eventually be configurable from the UI
         $app['np.extensions'] = $app->share($app->extend('np.extensions', function($extensions, $app) {
-            $extensions->register(new \NodePub\Core\Extension\CoreExtension($app));
-            $extensions->register(new \NodePub\Core\Extension\ThemeEngineExtension($app));
-            $extensions->register(new \NodePub\Core\Extension\BlogEngineExtension($app));
+            $extensions->register(new \NodePub\Core\Extensions\CoreExtension\CoreExtension($app));
+            $extensions->register(new \NodePub\Core\Extensions\ThemeEngineExtension\ThemeEngineExtension($app));
+            $extensions->register(new \NodePub\Core\Extensions\BlogEngineExtension\BlogEngineExtension($app));
             return $extensions;
         }));
     }

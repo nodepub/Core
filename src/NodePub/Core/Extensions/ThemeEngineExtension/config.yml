@@ -1,0 +1,12 @@
+name: NodePub Theme
+
+toolbar_items:
+  Themes:
+    route: admin_themes
+    icon: eye
+
+assets:
+  - /css/spectrum.css
+  - /js/lib/spectrum.js
+  - /js/np/themeEngine.js
+  - /js/np/colorPicker.js

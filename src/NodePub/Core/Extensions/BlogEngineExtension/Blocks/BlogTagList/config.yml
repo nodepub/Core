@@ -1,0 +1,3 @@
+name: Blog Tag List
+description: Displays a list of blog tags, sorted by popularity.
+namespace: BlogTagList

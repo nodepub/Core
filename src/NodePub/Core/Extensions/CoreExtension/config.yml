@@ -1,9 +1,6 @@
 name: NodePub Core
 
 toolbar_items:
-  Dashboard:
-    route: admin_dashboard
-    icon: dashboard
   Sites:
     route: admin_sites
     icon: asterisk
@@ -24,7 +21,15 @@ block_types:
   - HTML
   - Image
   - Markdown
+  - Slideshow
+  - YouTube
 
-resources:
+twig_extensions:
+  NodePub\Core\Extensions\CoreExtension\TwigExtension:
+    dependencies:
+      - np.block_provider
+      - np.slug_helper
+
+assets:
   - /js/np/toolbar.js
   - /js/np/panel.js

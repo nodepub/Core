@@ -16,14 +16,10 @@ interface ExtensionInterface
     public function getName();
 
     /**
-     * @return string
-     */
-    public function getResourceDirectory();
-
-    /**
+     * Returns an array of the extension's public asset paths.
      * @return array
      */
-    public function getResourceManifest();
+    public function getAssets();
 
     /**
      * @return string
@@ -38,14 +34,14 @@ interface ExtensionInterface
     public function getToolbarItems();
 
     /**
-     * @return array An array of BlockType instances
+     * @return array An array of BlockType names
      */
     public function getBlockTypes();
 
     /**
-     * @return array An array of Twig Functions
+     * @return array An array of Twig Extension instances
      */
-    public function getTwigFunctions();
+    public function getTwigExtensions();
 
     /**
      * @return array An array of snippets

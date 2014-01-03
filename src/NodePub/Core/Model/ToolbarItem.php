@@ -24,6 +24,15 @@ class ToolbarItem
         $this->route = $route;
         $this->icon = $icon;
     }
+    
+    public static function factory(array $array)
+    {
+        if (isset($array['name'], $array['route'], $array['icon'])) {
+            return new ToolbarItem($array['name'], $array['route'], $array['icon']);
+        } else {
+            throw new \Exception("ToolbarItem factory requires an array 'name', 'route', and 'icon' keys", 500);
+        }
+    }
 
     public function getName()
     {
