@@ -25,7 +25,7 @@ class BlockProvider
 
     public function get($blockId)
     {
-        foreach ($sources as $source) {
+        foreach ($this->sources as $source) {
             if ($block = $source->get($blockId)) {
                 return $block;
             }

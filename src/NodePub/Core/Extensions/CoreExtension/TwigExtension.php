@@ -36,15 +36,17 @@ class TwigExtension extends \Twig_Extension
     
     public function getFilters()
     {
+        $slugHelper = $this->slugHelper;
+        
         return array(
-            new \Twig_SimpleFilter('slugify', function($input) {
+            new \Twig_SimpleFilter('slugify', function($input) use ($slugHelper) {
                 if (is_array($input)) {
                     foreach ($input as $key => $item) {
-                        $input[$key] = $this->slugHelper->slugify($item);
+                        $input[$key] = $slugHelper->slugify($item);
                     }
                     return $input;
                 } else {
-                    return $this->slugHelper->slugify($input);
+                    return $slugHelper->slugify($input);
                 }
             }),
         );

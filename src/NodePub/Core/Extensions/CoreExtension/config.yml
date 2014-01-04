@@ -33,3 +33,5 @@ twig_extensions:
 assets:
   - /js/np/toolbar.js
   - /js/np/panel.js
+  - /shared/css/nivo-slider.css
+  - /shared/js/jquery.nivo.slider.min.js

@@ -51,12 +51,12 @@ class ExtensionServiceProvider implements ServiceProviderInterface
             
             // add template paths for all blocks
             $app['twig.loader.filesystem'] = $app->share($app->extend('twig.loader.filesystem', function($loader, $app) {
-                foreach ($app['np.extensions']['block_types'] as $extensionName => $blockType) {
-                    
-                    $path = __DIR__ . '/../Extensions/' . $extensionName . '/Blocks/' . $blockType;
-                    
-                    if (is_dir($path) || is_link($path)) {
-                        $loader->addPath($path, 'block_' . strtolower($blockType));
+                foreach ($app['np.extensions']['block_types'] as $extensionName => $blockTypes) {
+                    foreach ($blockTypes as $blockType) {
+                        $path = __DIR__ . '/../Extensions/' . $extensionName . '/Blocks/' . $blockType;
+                        if (is_dir($path) || is_link($path)) {
+                            $loader->addPath($path, 'block_' . strtolower($blockType));
+                        }
                     }
                 }
                 
