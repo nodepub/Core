@@ -19,6 +19,7 @@ use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
 
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -74,7 +75,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app['np.user_provider'] = $app->share(function($app) {
             return array(
                 // raw password is foo
-                'andrew' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
+                'admin' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
             );
         });
         
@@ -194,21 +195,37 @@ class CoreServiceProvider implements ServiceProviderInterface
         $app->get('/', function() use ($app) {
             return $app->redirect($app['url_generator']->generate($app['np.homepage_route']));
         });
-
+        
         $app->error(function (\Exception $e, $code) use ($app) {
-            if ($app['debug']) {
+
+            // Show error trace for non-404 errors
+            if ($app['debug'] && $code != 404) {
                 return;
-            }
+            }            
+            
+            $templates = $app['np.theme.manager']->getActiveTheme()->getTemplates();
 
             switch ($code) {
                 case 404:
-                    $message = 'The requested page could not be found.';
+                    $message = 'Sorry, the page you are looking for could not be found.';
+                    $template = $templates['error']['404'];
                     break;
-                default:
+                case 500:
                     $message = 'We are sorry, but something went terribly wrong.';
+                    $template = $templates['error']['500'];
+                default:
+                    $message = $e->getMessage();
+                    $template = $templates['error']['general'];
             }
 
-            return new Symfony\Component\HttpFoundation\Response($message);
+            // each theme can have its own error.twig, otherwise the default one is used
+            $content = $app['twig']->render($template, array(
+                'code' => $code,
+                'message' => $message
+            ));
+
+            return new Response($content, $code);
         });
+        
     }
 }
