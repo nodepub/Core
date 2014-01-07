@@ -6,13 +6,15 @@ class TwigExtension extends \Twig_Extension
 {
     protected $twigEnvironment,
               $blockProvider,
-              $slugHelper
+              $slugHelper,
+              $markdownHelper
               ;
     
-    function __construct($blockProvider, $slugHelper)
+    function __construct($blockProvider, $slugHelper, $markdownHelper)
     {
         $this->blockProvider = $blockProvider;
         $this->slugHelper = $slugHelper;
+        $this->markdownHelper = $markdownHelper;
     }
 
     public function getName()
@@ -37,6 +39,7 @@ class TwigExtension extends \Twig_Extension
     public function getFilters()
     {
         $slugHelper = $this->slugHelper;
+        $markdownHelper = $this->markdownHelper;
         
         return array(
             new \Twig_SimpleFilter('slugify', function($input) use ($slugHelper) {
@@ -48,6 +51,10 @@ class TwigExtension extends \Twig_Extension
                 } else {
                     return $slugHelper->slugify($input);
                 }
+            }),
+            
+            new \Twig_SimpleFilter('markdown', function($input) use ($markdownHelper) {
+                return $markdownHelper->transform($input);
             }),
         );
     }

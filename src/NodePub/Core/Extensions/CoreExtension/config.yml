@@ -29,6 +29,7 @@ twig_extensions:
     dependencies:
       - np.block_provider
       - np.slug_helper
+      - np.markdown
 
 assets:
   - /js/np/toolbar.js
