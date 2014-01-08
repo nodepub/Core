@@ -30,9 +30,10 @@ class TwigExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            'embed_image' => new \Twig_Function_Method($this, 'embedImage'),
+            'embed_image'     => new \Twig_Function_Method($this, 'embedImage'),
             'embed_slideshow' => new \Twig_Function_Method($this, 'embedSlideshow'),
-            'embed_youtube' => new \Twig_Function_Method($this, 'embedYouTube'),
+            'embed_youtube'   => new \Twig_Function_Method($this, 'embedYouTube'),
+            'split_button'    => new \Twig_Function_Method($this, 'splitButton'),
         );
     }
     
@@ -74,6 +75,34 @@ class TwigExtension extends \Twig_Extension
         }
     }
     
-    public function embedYouTube($blockId)
-    {}
+    /**
+     * Renders YouTube embed html for a YouTube block or raw video id
+     */
+    public function embedYouTube($blockOrVideoId)
+    {
+        $block = $this->blockProvider->get($blockOrVideoId);
+        
+        if ($block && isset($block['video'])) {
+            $video = $block['video'];
+        } else {
+            $video = $blockOrVideoId;
+        }
+        
+        return $this->twigEnvironment->render('@block_youtube/view.twig', array(
+            'block_id' => $blockOrVideoId,
+            'video' => $video,
+        ));
+    }
+    
+    public function splitButton($href, $label1, $label2 = '►', $class = '')
+    {
+        $class = 'btn-split ' . $class;
+        $btn = "<a class=\"$class\" href=\"$href\">"
+            . "<span>$label1</span>"
+            . "<span>$label2</span>"
+            . '</a>'
+            ;
+        
+        return $btn;
+    }
 }

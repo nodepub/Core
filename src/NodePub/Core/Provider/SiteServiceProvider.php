@@ -46,7 +46,6 @@ class SiteServiceProvider implements ServiceProviderInterface
 
             return $site;
         });
-        
 
         $app['np.sites.controller'] = $app->share(function($app) {
             return new SiteController($app);
@@ -59,6 +58,12 @@ class SiteServiceProvider implements ServiceProviderInterface
             
             return $adminControllers;
         }));
+        
+        // check if a typekit id is configured with the site
+        // typekit is gated by domain, so it makes more sense to configure them per site rather than theme
+        $app['np.typekit_id'] = $app->share(function($app) {
+            return $app['np.sites.active_site']->getAttribute('typekit_id');
+        });
     }
 
     public function boot(Application $app)

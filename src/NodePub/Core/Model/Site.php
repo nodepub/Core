@@ -154,16 +154,13 @@ class Site
         return $this->theme;
     }
     
-    
-    
-    
     /**
      * @return mixed
      */
     public function addAttribute($name, $value)
     {
         if (!$this->attributes->offsetExists($name)) {
-            $this->attributes->add($name, $value);
+            $this->attributes->set($name, $value);
         }
         
         return $this;
@@ -174,10 +171,7 @@ class Site
      */
     public function getAttribute($name, $defaultValue = null)
     {
-        if ($attr = $this->attributes->get($name)) {
-            return $attr;
-        } else {
-            return $defaultValue;
-        }
+        $attr = $this->attributes->get($name);
+        return $attr ?: $defaultValue;
     }
 }

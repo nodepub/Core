@@ -2,11 +2,11 @@
 
 namespace NodePub\Core\Extensions\ThemeEngineExtension;
 
+use NodePub\Core\Extension\DomManipulator;
 use NodePub\Core\Extension\Extension;
 use NodePub\Core\Model\ToolbarItem;
-
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ThemeEngineExtension extends Extension
 {
@@ -22,6 +22,22 @@ class ThemeEngineExtension extends Extension
         }
         
         return $content;
+    }
+    
+    /**
+     * Adds TypeKit script tags to end of head.
+     */
+    public function getSnippets()
+    {
+        $snippets = array();
+        
+        if (isset($this->app['np.typekit_id'])) {
+            $snippets[DomManipulator::END_HEAD] = function($app) {
+                return $app['twig']->render('@ThemeEngineExtension/_typeKit.twig', array('typekit_id' => $app['np.typekit_id']));
+            };
+        }
+        
+        return $snippets;
     }
 
     /**

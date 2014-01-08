@@ -11,7 +11,7 @@ use Silex\Application;
 class SnippetQueue
 {
     protected $queue;
-    protected $addjquery;
+    protected $addJquery;
     protected $matchedComments;
 
     public function __construct()
@@ -21,7 +21,7 @@ class SnippetQueue
 
     public function addJquery()
     {
-        $this->addjquery = true;
+        $this->addJquery = true;
     }
 
     public function addCss($url)
@@ -42,8 +42,8 @@ class SnippetQueue
 
     public function add(array $snippets)
     {
-        foreach ($snippets as $key => $value) {
-            $this->insert($key, $value);
+        foreach ($snippets as $location => $callback) {
+            $this->insert($location, $callback);
         }
     }
 
@@ -70,7 +70,7 @@ class SnippetQueue
 
             // Get the snippet, either by using a callback function,
             // or else use the passed string as-is
-            if (function_exists($snippet['callback'])) {
+            if (is_callable($snippet['callback'])) {
                 $snippetString = call_user_func($snippet['callback'], $app);
             } else {
                 $snippetString = $snippet['callback'];
@@ -86,7 +86,7 @@ class SnippetQueue
             }
         }
 
-        if ($this->addjquery==true) {
+        if ($this->addJquery === true) {
             $html = $domManipulator->insertJquery($html);
         }
 
