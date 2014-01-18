@@ -2,8 +2,9 @@ name: Image
 description: Add an uploaded image.
 namespace: Image
 model_schema:
-  url: text
+  src: text
   width: int
   height: int
   class: string
   title: string
+  attrs: array

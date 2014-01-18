@@ -2,16 +2,18 @@
 
 namespace NodePub\Core\Provider;
 
+use NodePub\Core\Controller\ExtensionController;
+use NodePub\Core\Extension\DomManipulator;
+use NodePub\Core\Extension\ExtensionContainer;
+use NodePub\Core\Helper\ImageHelper;
+use NodePub\Core\Model\BlockProvider;
+use NodePub\Core\Routing\ExtensionRouting;
+
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-
-use NodePub\Core\Extension\ExtensionContainer;
-use NodePub\Core\Extension\DomManipulator;
-use NodePub\Core\Routing\ExtensionRouting;
-use NodePub\Core\Controller\ExtensionController;
-use NodePub\Core\Model\BlockProvider;
 
 class ExtensionServiceProvider implements ServiceProviderInterface
 {
@@ -39,6 +41,12 @@ class ExtensionServiceProvider implements ServiceProviderInterface
         
         $app['np.block_provider'] = $app->share(function($app) {
             return new BlockProvider();
+        });
+        
+        $app['np.image_helper'] = $app->share(function($app) {
+            $helper = new ImageHelper();
+            $helper->publicSiteRootPath = '/assets/images/';
+            return $helper;
         });
     }
 
@@ -80,6 +88,10 @@ class ExtensionServiceProvider implements ServiceProviderInterface
         });
 
         $app->after(function(Request $request, Response $response) use ($app) {
+            
+            if ($response instanceof BinaryFileResponse) {
+                return;
+            }
 
             $app['np.extensions']->prepareSnippets();
 

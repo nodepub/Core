@@ -30,6 +30,7 @@ twig_extensions:
       - np.block_provider
       - np.slug_helper
       - np.markdown
+      - np.image_helper
 
 assets:
   - /js/np/toolbar.js

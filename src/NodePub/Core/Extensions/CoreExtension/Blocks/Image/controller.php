@@ -12,7 +12,6 @@ class ImageBlockController extends NodePub\Controller\BlockController
 
     public function install() {}
     public function uninstall() {}
-
     public function create() {}
     public function find() {}
     public function update() {}

@@ -7,14 +7,16 @@ class TwigExtension extends \Twig_Extension
     protected $twigEnvironment,
               $blockProvider,
               $slugHelper,
-              $markdownHelper
+              $markdownHelper,
+              $imageHelper
               ;
     
-    function __construct($blockProvider, $slugHelper, $markdownHelper)
+    function __construct($blockProvider, $slugHelper, $markdownHelper, $imageHelper)
     {
         $this->blockProvider = $blockProvider;
         $this->slugHelper = $slugHelper;
         $this->markdownHelper = $markdownHelper;
+        $this->imageHelper = $imageHelper;
     }
 
     public function getName()
@@ -60,8 +62,19 @@ class TwigExtension extends \Twig_Extension
         );
     }
     
-    public function embedImage($blockId)
-    {}
+    public function embedImage($blockIdOrSrc, $attrs = array())
+    {
+        $block = $this->blockProvider->get($blockIdOrSrc);
+        
+        if ($block && isset($block['src'])) {
+            $imgSrc = $block['src'];
+            $attrs['block_id'] = $blockIdOrSrc;
+        } else {
+            $imgSrc = $blockIdOrSrc;
+        }
+        
+        return $this->imageHelper->placeImage($imgSrc, $attrs);
+    }
     
     public function embedSlideshow($blockId)
     {
