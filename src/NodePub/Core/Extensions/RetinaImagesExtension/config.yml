@@ -1,0 +1,6 @@
+name: NodePub Retina Images
+
+twig_extensions:
+  NodePub\Core\Extensions\RetinaImagesExtension\TwigExtension:
+    dependencies:
+      - np.image_helper

@@ -1,0 +1,13 @@
+<script type="text/javascript">
+    writeCookie();
+    function writeCookie() {
+        theCookie = document.cookie;
+        if(theCookie) {
+            if(window.devicePixelRatio >= 2) {
+                theCookie = "{{ cookie_key }}=" + window.devicePixelRatio + ";" + theCookie;
+                document.cookie = theCookie;
+                location = '{{ redirect_to }}';
+            }
+        }
+    }
+</script>

@@ -11,6 +11,7 @@ class ImageHelper extends HtmlHelper
     const EXT_GIF = 'gif';
     const ATTR_WIDTH = 'width';
     const ATTR_HEIGHT = 'height';
+    const COOKIE_PIXEL_RATIO = 'np_pixel_ratio';
     
     /**
      * The filesystem directory where we check for image files
@@ -71,6 +72,19 @@ class ImageHelper extends HtmlHelper
         $attrs['src'] = $src;
         
         return $this->renderTag('img', $attrs);
+    }
+    
+    public function isRetinaChecked()
+    {
+        return isset($_COOKIE[self::COOKIE_PIXEL_RATIO]);
+    }
+    
+    public function isRetina()
+    {
+        return (
+            isset($_COOKIE[self::COOKIE_PIXEL_RATIO])
+            && $_COOKIE[self::COOKIE_PIXEL_RATIO] >= 2
+        );
     }
     
     /**
