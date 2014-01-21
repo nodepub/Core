@@ -2,26 +2,24 @@
 
 namespace NodePub\Core\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
-
 use NodePub\Common\Yaml\YamlCollectionLoader;
 use NodePub\Core\Bootstraper;
 use NodePub\Core\Config\ApplicationConfiguration;
 use NodePub\Core\Event\ThemeActivateListener;
-use NodePub\ThemeEngine\ThemeEvents;
-
 use NodePub\Core\Provider\AdminDashboardServiceProvider;
 use NodePub\Core\Provider\AdminRoutesServiceProvider;
 use NodePub\Core\Provider\ExtensionServiceProvider;
 use NodePub\Core\Provider\SiteServiceProvider;
 use NodePub\ThemeEngine\Provider\ThemeServiceProvider;
-
-use Symfony\Component\EventDispatcher\Event;
+use NodePub\ThemeEngine\ThemeEvents;
+use Silex\Application;
+use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
 use Symfony\Component\Yaml\Yaml;
+
 
 /**
  * Initializes other core Service Providers -- those built-in to Silex,
@@ -192,9 +190,11 @@ class CoreServiceProvider implements ServiceProviderInterface
         #    DEFAULT ROUTES                                     #
         # ===================================================== #
 
-        $app->get('/', function() use ($app) {
-            return $app->redirect($app['url_generator']->generate($app['np.homepage_route']));
-        });
+        // This was causing issues with homepages defined by df and eg sites
+        // Also, can't redirect to another '/' url or it causes infinite loop
+        // $app->get('/', function() use ($app) {
+        //     return $app->redirect($app['url_generator']->generate($app['np.homepage_route']));
+        // })->bind('np.default');
         
         $app->error(function (\Exception $e, $code) use ($app) {
 
