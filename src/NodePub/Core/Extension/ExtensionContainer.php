@@ -130,6 +130,9 @@ class ExtensionContainer extends \Pimple
         }
     }
     
+    /**
+     * Instantiates configured twig extensions, passing in its configured dependencies
+     */
     protected function instantiateTwigExtensions()
     {
         foreach ($this->twigExtensionConfigs as $className => $attrs) {
@@ -149,6 +152,9 @@ class ExtensionContainer extends \Pimple
         }
     }
     
+    /**
+     * Given an array of service IDs, returns an array of the actual services if they are found
+     */
     protected function expandDependencies($dependencies = array())
     {
         $expandedDependencies = array();
@@ -170,8 +176,7 @@ class ExtensionContainer extends \Pimple
     protected function registerBlockTypes(ExtensionInterface $ext)
     {
         $this['block_types'] = $this->share($this->extend('block_types', function($blockTypes) use ($ext) {
-            $class = new \ReflectionClass($ext);
-            $blockTypes[$class->getShortName()] = $ext->getBlockTypes();
+            $blockTypes[$ext->getNamespace()] = $ext->getBlockTypes();
             return $blockTypes;
         }));
     }

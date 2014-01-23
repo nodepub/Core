@@ -14,6 +14,16 @@ interface ExtensionInterface
      * @return string
      */
     public function getName();
+    
+    /**
+     * @return string
+     */
+    public function getNamespace();
+    
+    /**
+     * @return string
+     */
+    public function getPath();
 
     /**
      * Returns an array of the extension's public asset paths.

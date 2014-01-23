@@ -10,8 +10,13 @@ use Symfony\Component\Yaml\Yaml;
 
 abstract class Extension implements ExtensionInterface
 {
+    const CONFIG_FILE = 'config.yml';
+    
     protected $app,
-              $config
+              $config,
+              $reflection,
+              $path,
+              $blocks
               ;
 
     public function __construct(Application $app)
@@ -42,13 +47,58 @@ abstract class Extension implements ExtensionInterface
     
     protected function getConfigFilePath()
     {
-        $classInfo = new \ReflectionClass($this);
-        $configFile = dirname($classInfo->getFileName()) . '/config.yml';
+        $configFile = $this->getPath() . '/' . self::CONFIG_FILE;
         
         if (is_file($configFile)) {
             return $configFile;
         } else {
             throw new \Exception("No config.yml file for extension", 500);
+        }
+    }
+    
+    /**
+     * Returns fs path to extension's dir
+     */
+    protected function getPath()
+    {
+        if (is_null($this->path)) {
+            $reflection = $this->getReflection();
+            $this->path = dirname($reflection->getFileName());
+        }
+    
+        return $this->path;
+    }
+    
+    protected function getReflection()
+    {
+        if (is_null($this->reflection)) {
+            $this->reflection = new \ReflectionClass($this);
+        }
+        
+        return $this->reflection;
+    }
+    
+    /**
+     * Loads the config for each block
+     */
+    protected function loadBlocks()
+    {
+        $extPath = $this->getPath();
+        foreach ($this->getBlockTypes as $blockName) {
+            $this->blocks[$blockName] = $this->loadBlockConfig($extPath, $blockName);
+        }
+    }
+    
+    /**
+     * Loads the config for each of extension's blocks
+     */
+    protected function loadBlockConfig($extPath, $blockName)
+    {
+        $configFile = sprintf('%s/Blocks/%s/%s', $extPath, $blockName, self::CONFIG_FILE);
+        if (is_file($configFile)) {
+            return Yaml::parse($configFile);
+        } else {
+            throw new \Exception("No config.yml file for block {$blockName}", 500);
         }
     }
 
@@ -69,13 +119,29 @@ abstract class Extension implements ExtensionInterface
     {
         return $this->config['name'];
     }
+    
+    /**
+     * @ExtensionInterface
+     */
+    public function getNamespace()
+    {
+        return $this->getReflection()->getShortName();
+    }
 
     /**
      * @ExtensionInterface
      */
     public function getAssets()
     {
-        return $this->config['assets'];
+        $assets = $this->config['assets'];
+        
+        foreach ($this->loadBlocks() as $blockName => $config) {
+            if (isset($config['assets'])) {
+                $assets = array_merge($assets, $config['assets']);
+            }
+        }
+        
+        return $assets;
     }
 
     /**

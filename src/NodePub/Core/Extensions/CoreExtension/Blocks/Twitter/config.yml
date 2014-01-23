@@ -6,5 +6,5 @@ model_schema:
   twitter_user: string
   count: int
 
-js_modules:
-  - twitterBlock
+assets:
+  - twitterBlock.js

@@ -5,5 +5,5 @@ model_schema:
   tumblr_site: string
   count: int
 
-js_modules:
-  - tumblrBlock
+assets:
+  - tumblrBlock.js
