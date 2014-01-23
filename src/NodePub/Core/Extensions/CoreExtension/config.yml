@@ -22,6 +22,8 @@ block_types:
   - Image
   - Markdown
   - Slideshow
+  - Tumblr
+  - Twitter
   - YouTube
 
 twig_extensions:

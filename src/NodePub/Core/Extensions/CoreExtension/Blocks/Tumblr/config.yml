@@ -1,0 +1,9 @@
+name: Tumblr
+description: Display a group of images as a slideshow
+namespace: Tumblr
+model_schema:
+  tumblr_site: string
+  count: int
+
+js_modules:
+  - tumblrBlock

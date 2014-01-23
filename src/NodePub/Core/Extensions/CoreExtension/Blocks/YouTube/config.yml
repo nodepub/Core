@@ -1,0 +1,5 @@
+name: YouTube
+description: Embed a YouTube video
+namespace: YouTube
+model_schema:
+  video: string

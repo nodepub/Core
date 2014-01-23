@@ -1,5 +1,5 @@
 name: Image
-description: Add an uploaded image.
+description: Display an uploaded image
 namespace: Image
 model_schema:
   src: text

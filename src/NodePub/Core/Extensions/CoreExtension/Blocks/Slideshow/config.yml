@@ -1,0 +1,8 @@
+name: Slideshow
+description: Display a group of images as a slideshow
+namespace: Slideshow
+model_schema:
+  slides: array
+
+js_modules:
+  - slideshowBlock

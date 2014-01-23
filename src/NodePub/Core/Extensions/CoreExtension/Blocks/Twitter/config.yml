@@ -1,0 +1,10 @@
+name: Twitter
+description: Display a tweet stream
+namespace: Twitter
+model_schema:
+  title: string
+  twitter_user: string
+  count: int
+
+js_modules:
+  - twitterBlock
