@@ -58,21 +58,13 @@ class ExtensionServiceProvider implements ServiceProviderInterface
             $app['np.extensions']['admin'] = $app['np.admin'];
             $app['np.extensions']->boot();
             
-            // add template paths for all blocks
+            // add template paths for all extensions and blocks
             $app['twig.loader.filesystem'] = $app->share($app->extend('twig.loader.filesystem', function($loader, $app) {
                 foreach ($app['np.extensions']->getAll() as $namespace => $extension) {
-                    $path = $extension->getPath();
-                    if (is_dir($path) || is_link($path)) {
-                        $loader->addPath($path, $namespace);
-                    }
+                    $loader->addPath($extension->getPath(), $namespace);
                 }
-                
                 foreach ($app['np.extensions']['block_types'] as $blockType) {
-                    // $path = __DIR__ . '/../Extensions/' . $blockType->extensionName . '/Blocks/' . $blockType->name;
-                    $path = $blockType->getPath();
-                    if (is_dir($path) || is_link($path)) {
-                        $loader->addPath($path, 'block_' . strtolower($blockType->name));
-                    }
+                    $loader->addPath($blockType->getPath(), 'block_' . $app['np.slug_helper']->slugify($blockType->name));
                 }
                 
                 return $loader;

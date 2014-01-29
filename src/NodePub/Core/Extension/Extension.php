@@ -87,7 +87,7 @@ abstract class Extension implements ExtensionInterface
         $extPath = $this->getPath();
         foreach ($this->config['block_types'] as $blockName) {
             $blockType = $this->loadBlockTypeConfig($extPath, $blockName);
-            $blockType['extension'] = $this;
+            $blockType['extensionPath'] = $extPath;
             $this->blockTypes[] = $blockType;
         }
     }

@@ -25,12 +25,12 @@ class ToolbarItem
         $this->icon = $icon;
     }
     
-    public static function factory(array $array)
+    public static function factory(array $data)
     {
-        if (isset($array['name'], $array['route'], $array['icon'])) {
-            return new ToolbarItem($array['name'], $array['route'], $array['icon']);
+        if (isset($data['name'], $data['route'], $data['icon'])) {
+            return new ToolbarItem($data['name'], $data['route'], $data['icon']);
         } else {
-            throw new \Exception("ToolbarItem factory requires an array 'name', 'route', and 'icon' keys", 500);
+            throw new \Exception("ToolbarItem factory requires an array with 'name', 'route', and 'icon' keys", 500);
         }
     }
 

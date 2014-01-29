@@ -186,7 +186,7 @@ class ExtensionContainer extends \Pimple
     {
         $blockTypes = $ext->getBlockTypes();
         if (!empty($blockTypes)) {
-            $this->blockTypeConfigs[] = $blockTypes;
+            $this->blockTypeConfigs = array_merge($this->blockTypeConfigs, $blockTypes);
         }
     }
     

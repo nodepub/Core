@@ -9,7 +9,7 @@ class BlockType
     public
         $name,
         $namespace,
-        $extension,
+        $extensionPath,
         $isCore,
         $isInstalled
         ;
@@ -22,8 +22,11 @@ class BlockType
     
     public function getPath()
     {
-        if ($this->extension instanceof ExtensionInterface) {
-            return $this->extension->getPath() . '/Blocks/' . $this->name;
+        $path = $this->extensionPath . '/Blocks/' . str_replace(' ', '', $this->name);
+        if (is_dir($path) || is_link($path)) {
+            return $path;
+        } else {
+            throw new \Exception("Block path is not valid: {$path}", 500);
         }
     }
     

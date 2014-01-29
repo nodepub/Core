@@ -10,6 +10,21 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ThemeEngineExtension extends Extension
 {
+    public function isCore()
+    {
+        return true;
+    }
+    
+    public function isInstalled()
+    {
+        return true;
+    }
+    
+    public function isEnabled()
+    {
+        return true;
+    }
+    
     /**
      * If theme_preview is in the session, adds the theme switcher form.
      */
