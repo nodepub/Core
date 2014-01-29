@@ -44,7 +44,7 @@ interface ExtensionInterface
     public function getToolbarItems();
 
     /**
-     * @return array An array of BlockType names
+     * @return array An array of BlockType instances
      */
     public function getBlockTypes();
 

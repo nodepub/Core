@@ -2,21 +2,23 @@
 
 namespace NodePub\Core\Extension;
 
+use NodePub\Core\Extension\DomManipulator;
 use NodePub\Core\Extension\ExtensionInterface;
 use NodePub\Core\Extension\SnippetQueue;
-use NodePub\Core\Extension\DomManipulator;
+use NodePub\Core\Model\BlockType;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * A service container for all NodePub Extensions
+ * A service container for all NodePub Extensions. Aggregates extension items.
  */
 class ExtensionContainer extends \Pimple
 {
+    public $booted = false;
     protected $app;
     protected $extensions = array();
-    protected $booted = false;
     protected $twigExtensionConfigs = array();
+    protected $blockTypeConfigs = array();
 
     public function __construct(Application $app, array $values = array())
     {
@@ -27,6 +29,10 @@ class ExtensionContainer extends \Pimple
         $this['debug'] = false;
         $this['admin'] = false;
         $this['admin_content'] = '';
+        
+        $this['block_type_factory'] = $app->protect(function($blockTypeData) {
+            return BlockType::factory($blockTypeData);
+        });
         
         $this['block_types'] = $this->share(function() {
             return array();
@@ -54,7 +60,7 @@ class ExtensionContainer extends \Pimple
      */
     public function register(ExtensionInterface $extension)
     {
-        $this->extensions[$extension->getName()] = $extension;
+        $this->extensions[$extension->getNamespace()] = $extension;
         
         // Collect extension elements to prevent having to iterate over them multiple times
         $this->registerTwigExtensions($extension);
@@ -76,7 +82,8 @@ class ExtensionContainer extends \Pimple
                 }
             }
             
-            $this->instantiateTwigExtensions();
+            $this->bootTwigExtensions();
+            $this->bootBlockTypes();
 
             $this->booted = true;
         }
@@ -88,6 +95,8 @@ class ExtensionContainer extends \Pimple
      */
     public function prepareSnippets()
     {
+        if (!$this->booted) { return; }
+        
         foreach ($this->extensions as $ext) {
             
             $this['snippet_queue'] = $this->share($this->extend('snippet_queue', function($snippets) use ($ext) {
@@ -104,12 +113,12 @@ class ExtensionContainer extends \Pimple
     }
 
     /**
-     * Gets an extension by name if exists
+     * Gets an extension by namespace if exists
      */
-    public function getExtension($extName)
+    public function getExtension($extNamespace)
     {
-        if (isset($this->extensions[$extName])) {
-            return $this->extensions[$extName];
+        if (isset($this->extensions[$extNamespace])) {
+            return $this->extensions[$extNamespace];
         }
 
         throw new \Exception("No extension found with name [$extName]");
@@ -133,7 +142,7 @@ class ExtensionContainer extends \Pimple
     /**
      * Instantiates configured twig extensions, passing in its configured dependencies
      */
-    protected function instantiateTwigExtensions()
+    protected function bootTwigExtensions()
     {
         foreach ($this->twigExtensionConfigs as $className => $attrs) {
             if (isset($attrs['dependencies']) && is_array($attrs['dependencies'])) {
@@ -175,9 +184,23 @@ class ExtensionContainer extends \Pimple
      */
     protected function registerBlockTypes(ExtensionInterface $ext)
     {
-        $this['block_types'] = $this->share($this->extend('block_types', function($blockTypes) use ($ext) {
-            $blockTypes[$ext->getNamespace()] = $ext->getBlockTypes();
+        $blockTypes = $ext->getBlockTypes();
+        if (!empty($blockTypes)) {
+            $this->blockTypeConfigs[] = $blockTypes;
+        }
+    }
+    
+    protected function bootBlockTypes()
+    {
+        $blockTypeFactory = $this['block_type_factory'];
+        $blockTypes = array();
+        
+        foreach ($this->blockTypeConfigs as $blockTypeConfig) {
+            $blockTypes[] = $blockTypeFactory($blockTypeConfig);
+        }
+
+        $this['block_types'] = $this->share(function() use ($blockTypes) {
             return $blockTypes;
-        }));
+        });
     }
 }

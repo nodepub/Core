@@ -11,6 +11,9 @@ class ExtensionRouting implements ControllerProviderInterface
     {
         $extensionFinder = function($name) use($app) {
             if ($extension = $app['np.extensions']->getExtension($name)) {
+                if ($extension->isCore()) {
+                    # code...
+                }
                 return $extension;
             } else {
                 throw new \Exception("Extension not found", 404);
@@ -33,7 +36,15 @@ class ExtensionRouting implements ControllerProviderInterface
         $controllers->post('/{extension}/update', 'np.extensions.controller:updateAction')
             ->convert('extension', $extensionFinder)
             ->bind('admin_update_extension');
+        
+        $controllers->post('/{extension}/install', 'np.extensions.controller:installExtensionAction')
+            ->convert('extension', $extensionFinder)
+            ->bind('admin_install_extension');
 
+        $controllers->post('/{extension}/uninstall', 'np.extensions.controller:uninstallExtensionAction')
+            ->convert('extension', $extensionFinder)
+            ->bind('admin_uninstall_extension');
+        
         $controllers->post('/{extension}/activate', 'np.extensions.controller:activateExtensionAction')
             ->convert('extension', $extensionFinder)
             ->bind('admin_activate_extension');

@@ -35,6 +35,7 @@ class TwigExtension extends \Twig_Extension
             'embed_image'     => new \Twig_Function_Method($this, 'embedImage'),
             'embed_slideshow' => new \Twig_Function_Method($this, 'embedSlideshow'),
             'embed_youtube'   => new \Twig_Function_Method($this, 'embedYouTube'),
+            'render_block'     => new \Twig_Function_Method($this, 'renderBlock'),
             'split_button'    => new \Twig_Function_Method($this, 'splitButton'),
         );
     }
@@ -64,7 +65,7 @@ class TwigExtension extends \Twig_Extension
     
     public function embedImage($blockIdOrSrc, $attrs = array())
     {
-        $block = $this->blockProvider->get($blockIdOrSrc);
+        $block = $this->blockProvider->getOneById($blockIdOrSrc);
         
         if ($block && isset($block['src'])) {
             $imgSrc = $block['src'];
@@ -78,7 +79,7 @@ class TwigExtension extends \Twig_Extension
     
     public function embedSlideshow($blockId)
     {
-        $block = $this->blockProvider->get($blockId);
+        $block = $this->blockProvider->getOneById($blockId);
         if ($block && isset($block['slides']) && isset($block['img_path'])) {
             return $this->twigEnvironment->render('@block_slideshow/view.twig', array(
                 'block_id' => $blockId,
@@ -93,7 +94,7 @@ class TwigExtension extends \Twig_Extension
      */
     public function embedYouTube($blockOrVideoId)
     {
-        $block = $this->blockProvider->get($blockOrVideoId);
+        $block = $this->blockProvider->getOneById($blockOrVideoId);
         
         if ($block && isset($block['video'])) {
             $video = $block['video'];
@@ -105,6 +106,19 @@ class TwigExtension extends \Twig_Extension
             'block_id' => $blockOrVideoId,
             'video' => $video,
         ));
+    }
+    
+    public function renderBlock($blockId)
+    {
+        $block = $this->blockProvider->getOneById($blockId);
+        if ($block && isset($block['type'])) {
+            $template = '@block_' . lowercase($block['type']) . '/view.twig';
+            
+            // TODO: need to get other block params
+            return $this->twigEnvironment->render($template, array(
+                'block_id' => $blockId
+            ));
+        }
     }
     
     public function splitButton($href, $label1, $label2 = '►', $class = '')

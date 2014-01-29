@@ -1,5 +1,7 @@
 <?php
 
+namespace NodePub\Core\Extension;
+
 use NodePub\Core\Extension\ExtensionInterface;
 
 /**

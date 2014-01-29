@@ -1,6 +1,6 @@
 name: Slideshow
 description: Display a group of images as a slideshow
-namespace: Slideshow
+namespace: core_slideshow
 model_schema:
   slides: array
 

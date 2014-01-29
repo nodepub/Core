@@ -60,6 +60,14 @@ class ExtensionController
             # forward to template for errors
         }
     }
+    
+    public function installExtensionAction(Extension $extension)
+    {
+    }
+
+    public function uninstallExtensionAction(Extension $extension)
+    {
+    }
 
     public function activateExtensionAction(Extension $extension)
     {

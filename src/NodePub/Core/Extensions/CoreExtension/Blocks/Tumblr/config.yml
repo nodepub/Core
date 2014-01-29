@@ -1,6 +1,6 @@
 name: Tumblr
-description: Display a group of images as a slideshow
-namespace: Tumblr
+description: Display a feed from a Tumblr site
+namespace: core_tumblr
 model_schema:
   tumblr_site: string
   count: int

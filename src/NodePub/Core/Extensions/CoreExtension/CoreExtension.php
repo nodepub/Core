@@ -9,6 +9,21 @@ use Symfony\Component\HttpFoundation\Request;
 
 class CoreExtension extends Extension
 {
+    public function isCore()
+    {
+        return true;
+    }
+    
+    public function isInstalled()
+    {
+        return true;
+    }
+    
+    public function isEnabled()
+    {
+        return true;
+    }
+    
     /**
      * Adds the main admin toolbar.
      */
@@ -18,7 +33,7 @@ class CoreExtension extends Extension
     }
 
     /**
-     * Fetches the rendered admin toolbar through a subrequest.
+     * Fetches the rendered admin toolbar through a sub-request.
      *
      * @return string
      */

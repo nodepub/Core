@@ -1,6 +1,6 @@
 name: Image
 description: Display an uploaded image
-namespace: Image
+namespace: core_image
 model_schema:
   src: text
   width: int

@@ -23,7 +23,7 @@ class BlockProvider
         }
     }
 
-    public function get($blockId)
+    public function getOneById($blockId)
     {
         foreach ($this->sources as $source) {
             if ($block = $source->get($blockId)) {

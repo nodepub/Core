@@ -1,6 +1,6 @@
 name: Twitter
 description: Display a tweet stream
-namespace: Twitter
+namespace: core_twitter
 model_schema:
   title: string
   twitter_user: string

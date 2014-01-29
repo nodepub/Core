@@ -1,6 +1,6 @@
 name: Markdown
 description: Add a Markdown content block to your site, or add <code>{{ markdown(content) }}</code> in your templates
-namespace: Markdown
+namespace: core_markdown
 model_schema:
   content: text
   filteredContent: text

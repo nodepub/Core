@@ -1,5 +1,5 @@
 name: HTML
 description: Display a raw HTML block
-namespace: HTML
+namespace: core_html
 model_schema:
   content: text

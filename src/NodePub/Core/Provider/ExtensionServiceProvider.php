@@ -53,30 +53,30 @@ class ExtensionServiceProvider implements ServiceProviderInterface
     public function boot(Application $app)
     {
         $app->before(function() use ($app) {
+            
             $app['np.extensions']['debug'] = $app['debug'];
             $app['np.extensions']['admin'] = $app['np.admin'];
             $app['np.extensions']->boot();
             
             // add template paths for all blocks
             $app['twig.loader.filesystem'] = $app->share($app->extend('twig.loader.filesystem', function($loader, $app) {
-                foreach ($app['np.extensions']['block_types'] as $extensionName => $blockTypes) {
-                    
-                    $path = __DIR__ . '/../Extensions/' . $extensionName;
+                foreach ($app['np.extensions']->getAll() as $namespace => $extension) {
+                    $path = $extension->getPath();
                     if (is_dir($path) || is_link($path)) {
-                        $loader->addPath($path, $extensionName);
+                        $loader->addPath($path, $namespace);
                     }
-                    
-                    foreach ($blockTypes as $blockType) {
-                        $path = __DIR__ . '/../Extensions/' . $extensionName . '/Blocks/' . $blockType;
-                        if (is_dir($path) || is_link($path)) {
-                            $loader->addPath($path, 'block_' . strtolower($blockType));
-                        }
+                }
+                
+                foreach ($app['np.extensions']['block_types'] as $blockType) {
+                    // $path = __DIR__ . '/../Extensions/' . $blockType->extensionName . '/Blocks/' . $blockType->name;
+                    $path = $blockType->getPath();
+                    if (is_dir($path) || is_link($path)) {
+                        $loader->addPath($path, 'block_' . strtolower($blockType->name));
                     }
                 }
                 
                 return $loader;
             }));
-            
             
             // load collected twig functions
             $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
@@ -89,7 +89,7 @@ class ExtensionServiceProvider implements ServiceProviderInterface
 
         $app->after(function(Request $request, Response $response) use ($app) {
             
-            if ($response instanceof BinaryFileResponse) {
+            if ($response instanceof BinaryFileResponse || !$app['np.extensions']->booted) {
                 return;
             }
 

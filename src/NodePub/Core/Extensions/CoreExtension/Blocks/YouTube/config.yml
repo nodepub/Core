@@ -1,5 +1,5 @@
 name: YouTube
 description: Embed a YouTube video
-namespace: YouTube
+namespace: core_youtube
 model_schema:
   video: string

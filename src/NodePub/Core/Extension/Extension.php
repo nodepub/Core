@@ -4,6 +4,7 @@ namespace NodePub\Core\Extension;
 
 use NodePub\Core\Extension\ExtensionInterface;
 use NodePub\Core\Config\ExtensionConfiguration;
+use NodePub\Core\Model\BlockType;
 use Silex\Application;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Yaml\Yaml;
@@ -16,7 +17,7 @@ abstract class Extension implements ExtensionInterface
               $config,
               $reflection,
               $path,
-              $blocks
+              $blockTypes
               ;
 
     public function __construct(Application $app)
@@ -59,7 +60,7 @@ abstract class Extension implements ExtensionInterface
     /**
      * Returns fs path to extension's dir
      */
-    protected function getPath()
+    public function getPath()
     {
         if (is_null($this->path)) {
             $reflection = $this->getReflection();
@@ -79,35 +80,42 @@ abstract class Extension implements ExtensionInterface
     }
     
     /**
-     * Loads the config for each block
+     * Loads the config for each block type
      */
-    protected function loadBlocks()
+    protected function loadBlockTypeConfigs()
     {
         $extPath = $this->getPath();
-        foreach ($this->getBlockTypes as $blockName) {
-            $this->blocks[$blockName] = $this->loadBlockConfig($extPath, $blockName);
+        foreach ($this->config['block_types'] as $blockName) {
+            $blockType = $this->loadBlockTypeConfig($extPath, $blockName);
+            $blockType['extension'] = $this;
+            $this->blockTypes[] = $blockType;
         }
     }
     
     /**
-     * Loads the config for each of extension's blocks
+     * Loads the config for a single block type
      */
-    protected function loadBlockConfig($extPath, $blockName)
+    protected function loadBlockTypeConfig($extPath, $blockTypeName)
     {
-        $configFile = sprintf('%s/Blocks/%s/%s', $extPath, $blockName, self::CONFIG_FILE);
+        $configFile = sprintf('%s/Blocks/%s/%s', $extPath, $blockTypeName, self::CONFIG_FILE);
         if (is_file($configFile)) {
             return Yaml::parse($configFile);
         } else {
-            throw new \Exception("No config.yml file for block {$blockName}", 500);
+            throw new \Exception("No config.yml file for block type {$blockTypeName}", 500);
         }
     }
 
-    public function isActive()
+    public function isCore()
     {
         return false;
     }
-
-    public function isCore()
+    
+    public function isInstalled()
+    {
+        return false;
+    }
+    
+    public function isEnabled()
     {
         return false;
     }
@@ -135,7 +143,7 @@ abstract class Extension implements ExtensionInterface
     {
         $assets = $this->config['assets'];
         
-        foreach ($this->loadBlocks() as $blockName => $config) {
+        foreach ($this->loadBlockTypes() as $blockName => $config) {
             if (isset($config['assets'])) {
                 $assets = array_merge($assets, $config['assets']);
             }
@@ -165,7 +173,11 @@ abstract class Extension implements ExtensionInterface
      */
     public function getBlockTypes()
     {
-        return $this->config['block_types'];
+        if (is_null($this->blockTypes)) {
+            $this->loadBlockTypeConfigs();
+        }
+        
+        return $this->blockTypes;
     }
 
     /**
