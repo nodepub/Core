@@ -18,7 +18,7 @@ class Toolbar
 
     public function addItem(ToolbarItem $item)
     {
-        $this->items[]= $item;
+        $this->items[$item->name]= $item;
         return $this;
     }
 
