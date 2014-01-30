@@ -27,7 +27,8 @@ class ExtensionController
     {
         return new Response(
             $this->app['twig']->render('@np-admin/panels/extensions.twig', array(
-                'extensions' => $this->extensionContainer->getAll()
+                'extensions' => $this->extensionContainer->getAll(),
+                'toolbar' => $this->app['np.admin.toolbar']->getActiveItems($this->app['np.admin.toolbar.group_size']),
             ))
         );
     }
