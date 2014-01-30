@@ -8,10 +8,10 @@ namespace NodePub\Core\Model;
  */
 class ToolbarItem
 {
-    protected $name,
-              $route,
-              $icon,
-              $isActive;
+    public $name,
+           $route,
+           $icon,
+           $isActive;
 
     /**
      * @param string $name
