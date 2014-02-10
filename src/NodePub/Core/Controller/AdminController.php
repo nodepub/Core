@@ -50,8 +50,9 @@ class AdminController
         }
 
         return $this->app['twig']->render('@np-admin/_toolbar.twig', array(
-            'username' => 'Andrew', //$user->getUsername(),
+            'username' => 'Derp', //$user->getUsername(),
             'toolbar' => $this->app['np.admin.toolbar']->getGroupedActiveItems($this->app['np.admin.toolbar.group_size']),
+            'block_types' => $this->app['np.extensions']['block_types'],
             'js_modules' => array()
         ));
     }
@@ -66,23 +67,23 @@ class AdminController
     /**
      * Dynamically compiles all require.js modules defined by each extension
      */
-    public function javaScriptsAction()
-    {
-        $resources = $this->app['np.extension_manager']->collectMethodCalls('getResourceManifest');
-        foreach ($resources as $resource) {
-            if (0 === strpos($resource, '/js')) {
-                # code...
-                if (is_file($resource)) {
-                    file_get_contents($filename);
-                }
-            }
-        }
-
-        $response = new Response($js);
-        $response->headers->set('Content-Type', 'application/javascript');
-
-        return $response;
-    }
+    // public function javaScriptsAction()
+    // {
+    //     $resources = $this->app['np.extension_manager']->collectMethodCalls('getResourceManifest');
+    //     foreach ($resources as $resource) {
+    //         if (0 === strpos($resource, '/js')) {
+    //             # code...
+    //             if (is_file($resource)) {
+    //                 file_get_contents($filename);
+    //             }
+    //         }
+    //     }
+    // 
+    //     $response = new Response($js);
+    //     $response->headers->set('Content-Type', 'application/javascript');
+    // 
+    //     return $response;
+    // }
     
     public function sitemapAction()
     {

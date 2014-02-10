@@ -45,6 +45,12 @@ class ExtensionContainer extends \Pimple
         $this['snippet_queue'] = $this->share(function() {
             return new SnippetQueue();
         });
+        
+        $this['loader_class'] = 'NodePub\\Core\\Extension\\Loader';
+        
+        $app['loader'] = $app->share(function($app) {
+            return new $app['extension_loader_class']();
+        });
 
         foreach ($values as $key => $value) {
             $this[$key] = $value;
@@ -120,13 +126,26 @@ class ExtensionContainer extends \Pimple
         if (isset($this->extensions[$extNamespace])) {
             return $this->extensions[$extNamespace];
         }
-
-        throw new \Exception("No extension found with name [$extName]");
     }
 
     public function getAll()
     {
         return $this->extensions;
+    }
+    
+    public function getUninstalled()
+    {
+        $allExtDirs = $this['loader']->findExtensionDirectories();
+        $uninstalled = array();
+        
+        foreach ($allExtDirs as $splFileInfo) {
+            $dirName = $splFileInfo->getFilename();
+            if (!$this->getExtension()) {
+                $uninstalled[] = $dirName;
+            }
+        }
+        
+        return $uninstalled;
     }
     
     /**
