@@ -43,7 +43,8 @@ class CoreServiceProvider implements ServiceProviderInterface
             // If local development is running on a .dev hostname
             // automatically set debug mode, but to avoid having different local configs
             // set the name back to what it will be in production (defaults to .com)
-            if (array_pop(explode('.', $hostName)) == 'dev') {
+            $hostnameParts = explode('.', $hostName);
+            if (array_pop($hostnameParts) == 'dev') {
                 $app['debug'] = true;
                 $hostName = str_replace('.dev', '.com', $hostName);
             }
