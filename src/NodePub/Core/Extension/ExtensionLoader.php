@@ -2,8 +2,8 @@
 
 namespace NodePub\Core\Extension;
 
-use NodePub\Common\Trait\SourceDirectoryAwareInterface;
-use NodePub\Common\Trait\SourceDirectoryAwareTrait;
+use NodePub\Common\SourceDirectoryAwareInterface;
+use NodePub\Common\SourceDirectoryAwareTrait;
 use Symfony\Component\Finder\Finder;
 
 class ExtensionLoader implements SourceDirectoryAwareInterface
